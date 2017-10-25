@@ -6,13 +6,13 @@ Commit often, perfect later, publish once
 
 Classical version control systems have one central repository that is accessed by all participants.
 
-![Classical VCS](images/centralized-vcs.png)
+![Classical VCS](images/centralized-vcs.svg)
 
 Each participant checks out a working copy from the central repository. Changes are committed to the central repository directly.
 
 With Git every participant has its own full repository with all version information on his own machine.
 
-![Classical VCS](images/distributed-vcs.png)
+![Classical VCS](images/distributed-vcs.svg)
 
 This causes some advantages:
 
