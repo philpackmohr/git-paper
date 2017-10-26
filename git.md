@@ -31,7 +31,7 @@ Working with Git is much more easy and pleasant if you know some principles:
 
 - All operations are done on the "current" branch (the branch that was checked out the last time).
 - Most operations should be done with a clean working directory. This means that there should be no modifications since the last commit.
-- As long as you did not publish your commits to a central one, you can change almost all of them. You can even change the order of the commits, split a commit or combine them. But do not such things on published commits if there is not a *very* good reason for that and even then you must discuss this with all people that work on the repository. If you do not follow this advice you and/or your colleagues will be irritated very much and you could be hated by all of them. 
+- As long as you did not publish your commits to a central one, you can change almost all of them. You can even change the order of the commits, split a commit or combine them (these are so called "rebase" operations). But do not such things on published commits if there is not a *very* good reason for that and even then you must discuss this with all people that work on the repository. If you do not follow this advice you and/or your colleagues will be irritated very much and you could be hated by all of them. 
 
 ### First steps
 
@@ -523,9 +523,9 @@ If you make new commits, the "current" branch pointer (the branch pointer that i
 
 ## Creating and switching branches
 
-One branch is always created with the first commit and has the default name "master". Besides of this, there is nothing special about the "master" branch.
+One branch is always created with the first commit and has the default name "master". Beside of this, there is nothing special about the "master" branch.
 
-To add a new branch in the repository, you jus type:
+To add a new branch in the repository, you just type:
 
 ```
 PS D:\test\repo> git branch topic
@@ -567,13 +567,172 @@ The "current" branch pointer advances with your commits while other branch point
 
 ![Switched back to master](images/6-back-to-master.svg)
 
-If you now make a commit on the "master" branch, the history will split:
+If you now make a commit on the "master" branch, the history will diverge:
 
-![Split history](images/7-advance-master.svg)
+![Diverged history](images/7-advance-master.svg)
 
-# Merging
+## Example
 
-# Rebase
+Assuming your repository has this log (played through the "First steps" example):
+
+```
+PS D:\test\repo> git log --oneline
+25632ea Modify a file
+3dc35b9 My first commit
+```
+
+Typing `git branch` inside your repository should give you this output:
+
+```
+PS D:\test\repo> git branch
+* master
+```
+
+The repository contains two commits in the "master" branch. The "master" branch is the only one. The asterisk in the output of `git branch` indicates that the HEAD pointer is pointing to the "master" branch.
+
+Make a new branch and set the HEAD pointer to it:
+
+```
+PS D:\test\repo> git checkout -b my-test
+Switched to a new branch 'my-test'
+```
+
+Create a new file, e.g. "test.txt".
+
+Add this new file to the repository:
+
+```
+PS D:\test\repo> git add test.txt
+```
+
+And commit:
+
+```
+PS D:\test\repo> git commit -m "Add a test file"
+[my-test e728269] Add a test file
+ 1 file changed, 1 insertion(+)
+ create mode 100644 test.txt
+```
+
+Now `git log --oneline` should look like this:
+
+```
+PS D:\test\repo> git log --oneline
+e728269 Add a test file
+25632ea Modify a file
+3dc35b9 My first commit
+```
+
+Switch back to the "master" branch and let show you the log:
+
+```
+PS D:\test\repo> git checkout master
+Switched to branch 'master'
+PS D:\test\repo> git log --oneline
+25632ea Modify a file
+3dc35b9 My first commit
+```
+
+You see that the log line `e728269 Add a test file` is missing in the "master" branch. The lines `3dc35b9 My first commit` and `25632ea Modify a file` were not modified by the operations and stay exactly identical.
+
+Now create another file, add it to the repository and commit:
+
+```
+PS D:\test\repo> git add slave.txt
+PS D:\test\repo> git commit -m "Add slave to master"
+[master 9589a2d] Add slave to master
+ 1 file changed, 1 insertion(+)
+ create mode 100644 slave.txt
+```
+
+The current repository log:
+
+```
+PS D:\test\repo> git log --oneline
+9589a2d Add slave to master
+25632ea Modify a file
+3dc35b9 My first commit
+```
+
+### With Git Extensions
+
+#### Create a new branch and switch to it
+
+Step 1:
+
+![Select "Create branch" command](images/gitext-create-branch1.png)
+
+Step 2: Give a name and decide whether you want to checkout the branch right after creating:
+
+![Create branch dialog](images/gitext-create-branch2.png)
+
+After Creating and confirming the message dialog, the main window should look like this:
+
+![Main windows after branch was created](images/gitext-create-branch3.png)
+
+The arrow icon at "my-test" indicates that the HEAD pointer is set to the branch "my-test" ("my-test" is checked out).
+
+#### Add a commit to branch "my-test"
+
+Now add a new file and the main window should look like this:
+
+![Main window after file was added to branch "my-test"](images/gitext-branch-commit1.png)
+
+The branch pointers "my-test" and "master" do not point to the same commit anymore.
+
+#### Advance the "master" branch
+
+The Git Extensions UI offers multiple possibilities to checkout a branch:
+
+![Checkout branch possibility 1](images/gitext-checkout-possibility1.png)
+
+![Checkout branch possibility 2](images/gitext-checkout-possibility2.png)
+
+![Checkout branch possibility 3](images/gitext-checkout-possibility3.png)
+
+After the "master" branch is checked out, the main windows should look like this:
+
+![Checked out "master"](images/gitext-main-checked-out-master.png)
+
+The UI indicates now that the branch "my-test" and the containing changes are irrelevant the current working directory state. The file that was added there has disappeared.
+
+After adding a new file and committing it, the main window should look this way:
+
+![Main window after history was diverged](images/gitext-main-split-history.png)
+
+# Integration (merge and rebase)
+
+Git has several strategies for merging. There are 3 basic ones:
+
+- Fast-forward
+- Three-way
+- Rebase (use with caution)
+
+Which of these strategies is most appropriate depends on the situation and your preferences.
+
+If you type `git merge`, Git will default to fast-forward if possible, otherwise a tree-way merge is performed.
+
+## Fast-forward
+
+A fast-forward merge can be performed if the history did not diverge:
+
+![Linear Git history](images/linear-history.svg)
+
+In this figure, the branch "topic" has just some commits that are not contained in the "master" branch. To get the content of the "topic" branch into the "master" branch, you have to checkout the "master" branch if it did not happen yet and type `git merge topic`. In this case Git has nothing more to do as setting the "master" branch pointer to the commit where the "topic" branch pointer points to and setting the working copy to the state of this commit.
+
+![Linear history after fast-forward merge](images/linear-history-merge.svg)
+
+## Three-way
+
+If you want to merge branches that have both additional commits since the last common ancestor, you have to use the tree-way merge strategy.
+
+Assume this commit history:
+
+![Diverged Git history](images/diverged-history.svg)
+
+Since creation of the "topic" branch happened a commit on the "master" branch.
+
+...
 
 # Working with central repositories
 
