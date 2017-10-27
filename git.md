@@ -705,12 +705,12 @@ After adding a new file and committing it, the main window should look this way:
 Git has several strategies for merging. There are 3 basic ones:
 
 - Fast-forward
-- Three-way
+- Recursive
 - Rebase (use with caution)
 
 Which of these strategies is most appropriate depends on the situation and your preferences.
 
-If you type `git merge`, Git will default to fast-forward if possible, otherwise a tree-way merge is performed.
+If you type `git merge`, Git will default to fast-forward if possible, otherwise a recursive merge is performed.
 
 ## Fast-forward
 
@@ -718,21 +718,112 @@ A fast-forward merge can be performed if the history did not diverge:
 
 ![Linear Git history](images/linear-history.svg)
 
-In this figure, the branch "topic" has just some commits that are not contained in the "master" branch. To get the content of the "topic" branch into the "master" branch, you have to checkout the "master" branch if it did not happen yet and type `git merge topic`. In this case Git has nothing more to do as setting the "master" branch pointer to the commit where the "topic" branch pointer points to and setting the working copy to the state of this commit.
+In this figure, the branch "topic" has only some commits that are not contained in the "master" branch. To get the content of the "topic" branch into the "master" branch, you have to checkout the "master" branch if it did not happen yet and type `git merge topic`. In this case Git has nothing more to do as setting the "master" branch pointer to the commit where the "topic" branch pointer points to and setting the working copy to the state of this commit.
 
 ![Linear history after fast-forward merge](images/linear-history-merge.svg)
 
-## Three-way
+## Recursive
 
-If you want to merge branches that have both additional commits since the last common ancestor, you have to use the tree-way merge strategy.
+If you want to merge branches that have both additional commits since the last common ancestor, you have to use the recursive merge strategy.
 
 Assume this commit history:
 
 ![Diverged Git history](images/diverged-history.svg)
 
-Since creation of the "topic" branch happened a commit on the "master" branch.
+Since creation of the "topic" branch happened a commit on the "master" branch. To merge these branches, Git has to put the changes of them to a new commit:
+
+![Merged diverged history](images/diverged-history-merge.svg)
+
+## Rebase
+
+Git allows you to change the commit history. All imaginable thinks are possible:
+
+- Changing the order of commits
+- Splitting commits
+- Merging commits to one
+- Making a diverged history linear
+
+These operations are called "rebase" operations. As in real life, changing the history is not trivial. All references must be updated to make the changed history the true one. As long as the history is only known to one person (meaning the commits are not published yet), it is not much a problem. But after publishing, all people that work with the rebased repository have to reproduce your rebase too.
+
+A diverged history that was rebased to linear looks like following:
+
+![Diverged history rebased](images/diverged-history-rebase.svg)
+
+Their is a "topic" branch those original parent commit is "B" (a SHA-1 hash in a real repository) and was rebased that "E" is now the parent commit. The figure implies that the SHA-1 hash is recalculated with changed data ("C'" instead of "C").
+
+## Examples
+
+### Fast-forward
+
+First, make a new branch and switch to it:
+
+```
+PS D:\test\repo> git checkout -b to-be-fast-forwarded
+Switched to a new branch 'to-be-fast-forwarded'
+```
+
+Change a file and commit the change (e.g. a new line in "hello.txt"):
+
+```
+PS D:\test\repo> git commit -am "Improve greeting"
+[to-be-fast-forwarded 4ebf636] Improve greeting
+ 1 file changed, 1 insertion(+)
+```
+
+To merge "to-be-fast-forwarded" into "master", "master" has to be checked out (meaning to be made the current branch):
+
+```
+PS D:\test\repo> git checkout master
+Switched to branch 'master'
+```
+
+Then merge:
+
+```
+PS D:\test\repo> git merge to-be-fast-forwarded
+Updating 9589a2d..4ebf636
+Fast-forward
+ hello.txt | 1 +
+ 1 file changed, 1 insertion(+)
+```
+
+Git said that it performed a "Fast-forward" merge. The branch pointers "master" and "to-be-fast-forwarded" point to the sae commit and the commit history is linear.
+
+### Recursive
+
+If you still reproduce the examples with the repository of the beginning (recommended), you should have a branch "my-test". If not, make it and put a file their (e.g. "test.txt").
+
+Now merge:
+
+```
+PS D:\test\repo> git merge my-test
+Merge made by the 'recursive' strategy.
+ test.txt | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 test.txt
+```
+
+Git said that it made a "recursive" merge. Typing `git log --oneline --graph` will give you this output:
+
+```
+PS D:\test\repo> git log --oneline --graph
+*   2e32353 Merge branch 'my-test'
+|\
+| * e728269 Add a test file
+* | 4ebf636 Improve greeting
+* | 9589a2d Add slave to master
+|/
+* 25632ea Modify a file
+* 3dc35b9 My first commit
+```
+
+As you see in the output above, the commit history consists now of two parallel lines that have their root at commit "25632ea" and are merged in a so called "merge commit". This commit was created automatically by Git. If you prefer to commit manually after merge, you have to type `git merge --no-commit branch-name` instead.
+
+### Rebase
 
 ...
+
+## Handling merge conflicts
 
 # Working with central repositories
 
