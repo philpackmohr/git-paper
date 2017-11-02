@@ -742,20 +742,22 @@ There is a commit on the "master" branch since the "topic" branch was created. T
 
 ## Rebase
 
-Git allows you to change the commit history. All imaginable thinks are possible:
+Git allows you to change the commit history. All imaginable thinks are possible, e.g.
 
 - Changing the order of commits
 - Splitting commits
 - Merging commits to one
 - Making a diverged history linear
 
-These operations are called "rebase" operations. As in real life, changing the history is not trivial. All references must be updated to make the changed history the true one. As long as the history is only known to one person (meaning the commits are not published yet), it is not much a problem. But after publishing, all people that work with the rebased repository have to reproduce your rebase too.
+These operations are called "rebase" operations. As in real life, changing the history is not trivial. All references must be rewritten to make the changed history the true one. As long as the history is only known to one person (meaning the commits are not published yet), it is not much a problem. But after publishing, all people that work with the rebased repository have to reproduce your rebase too.
+
+A rebase is performed by creating new commits that are based on certain old commits. Because every rebase changes some data of commits to rebase, the new commits get new hash sums. Branch pointers have to be updated too - otherwise the old commits that were rebased will stay visible as long as they are reachable by a branch pointer.
 
 A diverged history that was rebased to linear can look like following:
 
 ![Diverged history rebased](images/diverged-history-rebase.svg)
 
-Their is a "topic" branch those original parent commit is "B" (a SHA-1 hash in a real repository) and was rebased that "E" is now the parent commit. The figure implies that the SHA-1 hash is recalculated with changed data ("C'" instead of "C").
+There is a "topic" branch those original parent commit is `B` (a SHA-1 hash in a real repository) and was rebased that `E` is now the parent commit. The figure implies that the SHA-1 hash is recalculated with changed data (`C'` instead of `C`).
 
 ## Examples
 
@@ -768,7 +770,7 @@ PS D:\test\repo> git checkout -b to-be-fast-forwarded
 Switched to a new branch 'to-be-fast-forwarded'
 ```
 
-Change a file and commit the change (e.g. a new line in "hello.txt"):
+Change a file and commit the change (e.g. an additional text line in "hello.txt"):
 
 ```
 PS D:\test\repo> git commit -am "Improve greeting"
@@ -793,11 +795,11 @@ Fast-forward
  1 file changed, 1 insertion(+)
 ```
 
-Git said that it performed a "Fast-forward" merge. The branch pointers "master" and "to-be-fast-forwarded" point to the same commit and the commit history is linear.
+Git said that it performed a "Fast-forward" merge. The branch pointers "master" and "to-be-fast-forwarded" point now to the same commit and the commit history is linear.
 
 ### Recursive
 
-If you still reproduce the examples with the repository of the beginning (recommended), you should have a branch "my-test". If not, make it and put a file their (e.g. "test.txt").
+If you still reproduce the examples with the repository of the beginning (recommended), you should have a branch "my-test". If not, make it and put a file there (e.g. "test.txt").
 
 Now merge:
 
@@ -859,9 +861,9 @@ pick 6e6ad01 Add a test file
 # Note that empty commits are commented out
 ```
 
-Actually, a kind of script will be executed. The lines that start with `#` are comments. You can abort the rebase at this point by deleting the first two lines, saving the text and closing the editor - no line to execute says Git that there is nothing to do. Note that the commits here are in opposite order - the newer commits are below the older ones.
+Actually, a kind of script will be executed by Git in this case. The lines that start with `#` are comments. You can abort the rebase at this point by deleting the first two lines, saving the text and closing the editor - no line to execute says Git that there is nothing to do. Note that the commits here are in opposite order - the newer commits are below the older ones.
 
-In this example there is not more to da as closing the text editor, containing the default text. Git will then perform the rebase. A `git log --oneline --graph --all` will look almost as intended:
+In this example there is not more to do as closing the text editor, containing the default text. Git will then perform the rebase. A `git log --oneline --graph --all` will look almost as intended:
 
 ```
 D:\test\repo [master]> git rebase -i HEAD~2
@@ -889,7 +891,7 @@ D:\test\repo [master]> git log --oneline --graph --all
 * 0c55337 My first commit
 ```
 
-Note, that `-D` instead of `-d` was used, because the commits of that branch will be not reachable by any branch and there changes would be lost in normal circumstances.
+Note, that `-D` instead of `-d` was used, because the commits of that branch will be not reachable by any branch and their changes would be lost in normal circumstances.
 
 ### With Git Extensions
 
@@ -927,6 +929,8 @@ After that, the history should look like this:
 
 #### Rebasing
 
+Note: The following example was constructed to match the above CLI example. There are multiple ways to archive the same result.
+
 To rebase, select this command:
 
 ![Rebase in Git Extensions, step 1](images/gitext-rebase1.png)
@@ -939,7 +943,7 @@ Type in the field "Rebase on" the text `HEAD~2` and check the checkbox "Interact
 
 ![Rebase in Git Extensions, step 3](images/gitext-rebase3.png)
 
-This looks the same as in the corresponding command line example and as there you can just close the editor. The history should now look like this:
+This looks the same as in the corresponding command line example. You can just close the editor. The history should now look like this:
 
 ![Rebase in Git Extensions, step 4](images/gitext-rebase4.png)
 
@@ -956,6 +960,143 @@ The history should look as clean as this now:
 ![Rebase in Git Extensions, success](images/gitext-rebase7.png)
 
 ## Handling merge conflicts
+
+As other VCSs, Git cannot merge automatically if the same file was edited at the same place in two branches. When this occurs, Git will not perform an automatic merge commit. The user is supposed to resolve these conflicts first and then commit.
+
+Note: You can decide to not solve the conflicts yet by typing `git merge --abort`. This will put back your repository, including the working directory to a clean state.
+
+### Example
+
+Assume a repository with a branch "master" that contains a file "hello.txt" with this content:
+
+```
+Hello, people
+Nice to meet you
+```
+
+Checkout a new branch:
+
+```
+D:\test\repo [master]> git checkout -b to-be-conflicted
+Switched to a new branch 'to-be-conflicted'
+```
+
+Modify the file "hello.txt", e.g. by replacing "Hello" with "Hallo". `git status` should look like this:
+
+```
+D:\test\repo [to-be-conflicted +0 ~1 -0 !]> git status
+On branch to-be-conflicted
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   hello.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+And commit:
+
+```
+D:\test\repo [to-be-conflicted +0 ~1 -0 !]> git commit -am "Say hallo instead of hello"
+[to-be-conflicted 2459d02] Say hallo instead of hello
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
+Checkout the "master" branch and edit "hello.txt again at the same place, e.g. by replacing "Hello" with "Hola":
+
+```
+D:\test\repo [to-be-conflicted]> git checkout master
+
+# ... Some edits
+
+D:\test\repo [master +0 ~1 -0 !]> git commit -am "Say hola instead of hello"
+[master 7861168] Say hola instead of hello
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
+A merge now will lead to a conflict:
+
+```
+D:\test\repo [master]> git merge to-be-conflicted
+Auto-merging hello.txt
+CONFLICT (content): Merge conflict in hello.txt
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+Typing `git status`:
+
+```
+D:\test\repo [master +0 ~0 -0 !1 | +0 ~0 -0 !1 !]> git status
+On branch master
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+        both modified:   hello.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+The content of your file "hello.txt" should look like this:
+
+```
+<<<<<<< HEAD
+Hola, people
+=======
+Hallo, people
+>>>>>>> to-be-conflicted
+Nice to meet you
+```
+
+The first line `<<<<<<< HEAD` marks the start of the change of the current branch. The line `=======` marks the end of the change of the current branch and the start of the change of the "other" branch (the branch that shall be merged into the current one). The end of the "other branch" change is marked by the line `>>>>>>> to-be-conflicted` ("to-be-conflicted" is the name of the other branch).
+
+You can edit the conflicted file as you want - probably you want get rid of the conflict markers and choose one or the other change. Let's say both changes are not good and edit the file to look like this:
+
+```
+Greetings, people
+Nice to meet you
+```
+
+Now mark the file as solved:
+
+```
+D:\test\repo [master +0 ~0 -0 !1 | +0 ~0 -0 !1 !]> git add hello.txt
+D:\test\repo [master +0 ~1 -0 ~]> git status
+On branch master
+All conflicts fixed but you are still merging.
+  (use "git commit" to conclude merge)
+
+Changes to be committed:
+
+        modified:   hello.txt
+
+```
+
+If you now type `git commit` only, a text editor, containing the standard merge commit message will appear. After closing the editor, the commit will be performed and the two conflicting branches are merged successfully:
+
+```
+D:\test\repo [master +0 ~1 -0 ~]> git commit
+[master 4668544] Merge branch 'to-be-conflicted'
+D:\test\repo [master]> git log --oneline --graph
+*   4668544 Merge branch 'to-be-conflicted'
+|\
+| * 2459d02 Say hallo instead of hello
+* | 30c7c7c Say hola instead of hello
+|/
+* 418ac30 Add a test file
+* 3efacf6 Improve greeting
+* fcfa7b8 Add slave to master
+* a6d57e3 Modify a file
+* 0c55337 My first commit
+```
+
+#### With Git Extensions
+
+...
 
 # Working with central repositories
 
