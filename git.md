@@ -749,7 +749,7 @@ Git allows you to change the commit history. All imaginable thinks are possible,
 - Merging commits to one
 - Making a diverged history linear
 
-These operations are called "rebase" operations. As in real life, changing the history is not trivial. All references must be rewritten to make the changed history the true one. As long as the history is only known to one person (meaning the commits are not published yet), it is not much a problem. But after publishing, all people that work with the rebased repository have to reproduce your rebase too.
+These operations are called "rebase" operations, because most of them are done with the command `git rebase`. As in real life, changing the history is not trivial. All references must be rewritten to make the changed history the true one. As long as the history is only known to one person (meaning the commits are not published yet), it is not much a problem. But after publishing, all people that work with the rebased repository have to reproduce your rebase too.
 
 A rebase is performed by creating new commits that are based on certain old commits. Because every rebase changes some data of commits to rebase, the new commits get new hash sums. Branch pointers have to be updated too - otherwise the old commits that were rebased will stay visible as long as they are reachable by a branch pointer.
 
@@ -758,6 +758,8 @@ A diverged history that was rebased to linear can look like following:
 ![Diverged history rebased](images/diverged-history-rebase.svg)
 
 There is a "topic" branch those original parent commit is `B` (a SHA-1 hash in a real repository) and was rebased that `E` is now the parent commit. The figure implies that the SHA-1 hash is recalculated with changed data (`C'` instead of `C`).
+
+Note: some operations are not done with `git rebase`. One example is `git commit --amend` that allows you to correct the last commit. Another example is `git filter-branch` that lets you rewrite the history of all reachable commits with one command or script. Both Git commands will be examined in the examples below.
 
 ## Examples
 
@@ -827,7 +829,9 @@ PS D:\test\repo> git log --oneline --graph
 
 As you see in the output above, the commit history consists now of two parallel lines that have their root at commit "25632ea" and are merged in a so called "merge commit". This commit was created automatically by Git. If you prefer to commit manually after merge (e.g. to put your own commit message), you have to type `git merge --no-commit branch-name` instead.
 
-### Rebase
+### Rebase examples
+
+#### Make diverged history linear
 
 To perform a very basic example, the example repository will be rebased that the diverged history will be made linear. First, type:
 
@@ -863,7 +867,7 @@ pick 6e6ad01 Add a test file
 
 Actually, a kind of script will be executed by Git in this case. The lines that start with `#` are comments. You can abort the rebase at this point by deleting the first two lines, saving the text and closing the editor - no line to execute says Git that there is nothing to do. Note that the commits here are in opposite order - the newer commits are below the older ones.
 
-In this example there is not more to do as closing the text editor, containing the default text. Git will then perform the rebase. A `git log --oneline --graph --all` will look almost as intended:
+In this example there is not more to do as closing the text editor containing the default text. Git will then perform the rebase. A `git log --oneline --graph --all` will look almost as intended:
 
 ```
 D:\test\repo [master]> git rebase -i HEAD~2
@@ -892,6 +896,396 @@ D:\test\repo [master]> git log --oneline --graph --all
 ```
 
 Note, that `-D` instead of `-d` was used, because the commits of that branch will be not reachable by any branch and their changes would be lost in normal circumstances.
+
+#### Correct last commit
+
+It happens quiet fast that an erroneous commit is made. One way to correct this is to make "correction commits" that contain messages like "Fixed typo", "Fixed build error", "Forgot to add a file" etc. This is not pretty and it is not possible this way to correct typos in the commit message itself. A common solution to this problem is `git commit --amend`.
+
+Put a file in your repository, e.g. "error.txt" with this content:
+
+```
+Sum errorz here
+```
+
+Commit:
+
+```
+D:\test\repo [master +1 ~0 -0 !]> git add error.txt
+D:\test\repo [master +1 ~0 -0 ~]> git commit -m "Introduse errorz"
+[master e115c2e] Introduse errorz
+ 1 file changed, 1 insertion(+)
+ create mode 100644 error.txt
+```
+
+Note the manual `git add ...` before the actual commit. The command `git commit -a` only adds file to the staging area that are already tracked (meaning known to the VCS) but modified. New files are not tracked yet that is changed by manually adding the new file to the staging area.
+
+Now let's fix this commit. The content of "errror.txt" should look as following:
+
+```
+Some errors here
+```
+
+Add the change to the staging area:
+
+```
+$ git add error.txt
+```
+
+And recommit (with no typo in the message either):
+
+```
+D:\test\repo [master +0 ~1 -0 ~]> git commit --amend -m "Introduce errors"
+[master 979003e] Introduce errors
+ Date: Fri Nov 3 15:52:26 2017 +0100
+ 1 file changed, 1 insertion(+)
+ create mode 100644 error.txt
+D:\test\repo [master]> git log --oneline --graph --all
+* 979003e Introduce errors
+* 7e8d078 Add a test file
+* 4ebf636 Improve greeting
+* 9589a2d Add slave to master
+* 25632ea Modify a file
+* 3dc35b9 My first commit
+```
+
+As you see in the output of `git log`, the commit history now looks as the last commit was always this way.
+
+#### Delete files out of the complete history
+
+For this example, it seems appropriate to create a Visual Studio project in a new repository. Assume a console application named "hello". Initialize the repository and make your first commit right after creating the Visual Studio solution:
+
+```
+D:\test\hello> git init
+Initialized empty Git repository in D:/test/hello/.git/
+D:\test\hello [master +3 ~0 -0 !]> git add .
+D:\test\hello [master +15 ~0 -0 ~]> git commit -m Initialize
+[master (root-commit) 590fa0c] Initialize
+ 15 files changed, 163 insertions(+)
+ create mode 100644 .vs/hello/v14/.suo
+ create mode 100644 hello.sln
+ create mode 100644 hello/App.config
+ create mode 100644 hello/Program.cs
+ create mode 100644 hello/Properties/AssemblyInfo.cs
+ create mode 100644 hello/bin/Debug/hello.exe.config
+ create mode 100644 hello/bin/Debug/hello.vshost.exe
+ create mode 100644 hello/bin/Debug/hello.vshost.exe.config
+ create mode 100644 hello/bin/Debug/hello.vshost.exe.manifest
+ create mode 100644 hello/hello.csproj
+ create mode 100644 hello/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+ create mode 100644 hello/obj/Debug/TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs
+ create mode 100644 hello/obj/Debug/TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs
+ create mode 100644 hello/obj/Debug/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
+ create mode 100644 hello/obj/Debug/hello.csproj.FileListAbsolute.txt
+```
+
+You see in the output of `git commit` that there are already files that you do not want to commit usually. But we go further: add some content to the file "Program.cs" - e.g. like this:
+
+```csharp
+using System;
+
+namespace hello
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello, world!");
+        }
+    }
+}
+```
+
+Now build the solution (Ctrl+Shift+B in Visual Studio), add some additional yet untracked files and commit:
+
+```
+D:\test\hello [master +5 ~2 -0 !]> git add .
+D:\test\hello [master +5 ~2 -0 ~]> git commit -m "First approach to solve this complex problem"
+[master 02f7599] First approach to solve this complex problem
+ 7 files changed, 6 insertions(+), 4 deletions(-)
+ create mode 100644 hello/bin/Debug/hello.exe
+ create mode 100644 hello/bin/Debug/hello.pdb
+ create mode 100644 hello/obj/Debug/hello.csprojResolveAssemblyReference.cache
+ create mode 100644 hello/obj/Debug/hello.exe
+ create mode 100644 hello/obj/Debug/hello.pdb
+```
+
+Now we have two commits that both contain a bunch of generated files that should never be committed. To delete these files:
+
+```
+D:\test\hello [master]> git filter-branch --index-filter 'git rm --cached --ignore-unmatch hello/bin/* hello/obj/* .vs/*' HEAD
+Rewrite 590fa0c172c1abb942f2a65b70650a19b439c2ec (1/2) (0 seconds passed, remaining 0 predicted)    rm '.vs/hello/v14/.suo'
+rm 'hello/bin/Debug/hello.exe.config'
+rm 'hello/bin/Debug/hello.vshost.exe'
+rm 'hello/bin/Debug/hello.vshost.exe.config'
+rm 'hello/bin/Debug/hello.vshost.exe.manifest'
+rm 'hello/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache'
+rm 'hello/obj/Debug/TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs'
+rm 'hello/obj/Debug/TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs'
+rm 'hello/obj/Debug/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs'
+rm 'hello/obj/Debug/hello.csproj.FileListAbsolute.txt'
+Rewrite 02f759993479e45f75c588023e87fbe9c12e248d (2/2) (1 seconds passed, remaining 0 predicted)    rm '.vs/hello/v14/.suo'
+rm 'hello/bin/Debug/hello.exe'
+rm 'hello/bin/Debug/hello.exe.config'
+rm 'hello/bin/Debug/hello.pdb'
+rm 'hello/bin/Debug/hello.vshost.exe'
+rm 'hello/bin/Debug/hello.vshost.exe.config'
+rm 'hello/bin/Debug/hello.vshost.exe.manifest'
+rm 'hello/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache'
+rm 'hello/obj/Debug/TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs'
+rm 'hello/obj/Debug/TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs'
+rm 'hello/obj/Debug/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs'
+rm 'hello/obj/Debug/hello.csproj.FileListAbsolute.txt'
+rm 'hello/obj/Debug/hello.csprojResolveAssemblyReference.cache'
+rm 'hello/obj/Debug/hello.exe'
+rm 'hello/obj/Debug/hello.pdb'
+
+Ref 'refs/heads/master' was rewritten
+```
+
+The above command consists of two nested parts:
+
+1. `git filter-branch --index-filter '<COMMAND>' HEAD`
+2. "&lt;COMMAND&gt;" = `git rm --cached --ignore-unmatch hello/bin/* hello/obj/* .vs/*`
+
+The first part of the command says Git that the complete commit history shall be rewritten. The second part will be executed with every commit - in this example certain files shall be deleted.
+
+When you type `git log --patch` you will see that the files are really not in the history anymore:
+
+```
+$ git log --patch
+commit 1e378e735e28bb795d39b0a6207e3f3a31eb919a
+Author: Christian Dreier <christian.dreier@csa-germany.de>
+Date:   Fri Nov 3 16:27:57 2017 +0100
+
+    First approach to solve this complex problem
+
+diff --git a/hello/Program.cs b/hello/Program.cs
+index aa9da9c..5bd13ab 100644
+--- a/hello/Program.cs
++++ b/hello/Program.cs
+@@ -1,8 +1,4 @@
+ ´╗┐using System;
+-using System.Collections.Generic;
+-using System.Linq;
+-using System.Text;
+-using System.Threading.Tasks;
+ 
+ namespace hello
+ {
+@@ -10,6 +6,7 @@ namespace hello
+     {
+         static void Main(string[] args)
+         {
++            Console.WriteLine("Hello, world!");
+         }
+     }
+ }
+
+commit 5549a6c8b1c8829020176ce18bb2c24c542b1de2
+Author: Christian Dreier <christian.dreier@csa-germany.de>
+Date:   Fri Nov 3 16:18:25 2017 +0100
+
+    Initialize
+
+diff --git a/hello.sln b/hello.sln
+new file mode 100644
+index 0000000..9f54cb3
+--- /dev/null
++++ b/hello.sln
+@@ -0,0 +1,22 @@
++´╗┐
++Microsoft Visual Studio Solution File, Format Version 12.00
++# Visual Studio 14
++VisualStudioVersion = 14.0.24720.0
++MinimumVisualStudioVersion = 10.0.40219.1
++Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hello", "hello\hello.csproj", "{F0388065-CAD5-4C07-B4EA-66DB6334EE34}"
++EndProject
++Global
++	GlobalSection(SolutionConfigurationPlatforms) = preSolution
++		Debug|Any CPU = Debug|Any CPU
++		Release|Any CPU = Release|Any CPU
++	EndGlobalSection
++	GlobalSection(ProjectConfigurationPlatforms) = postSolution
++		{F0388065-CAD5-4C07-B4EA-66DB6334EE34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
++		{F0388065-CAD5-4C07-B4EA-66DB6334EE34}.Debug|Any CPU.Build.0 = Debug|Any CPU
++		{F0388065-CAD5-4C07-B4EA-66DB6334EE34}.Release|Any CPU.ActiveCfg = Release|Any CPU
++		{F0388065-CAD5-4C07-B4EA-66DB6334EE34}.Release|Any CPU.Build.0 = Release|Any CPU
++	EndGlobalSection
++	GlobalSection(SolutionProperties) = preSolution
++		HideSolutionNode = FALSE
++	EndGlobalSection
++EndGlobal
+diff --git a/hello/App.config b/hello/App.config
+new file mode 100644
+index 0000000..d740e88
+--- /dev/null
++++ b/hello/App.config
+@@ -0,0 +1,6 @@
++´╗┐<?xml version="1.0" encoding="utf-8" ?>
++<configuration>
++    <startup> 
++        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5.2" />
++    </startup>
++</configuration>
+\ No newline at end of file
+diff --git a/hello/Program.cs b/hello/Program.cs
+new file mode 100644
+index 0000000..aa9da9c
+--- /dev/null
++++ b/hello/Program.cs
+@@ -0,0 +1,15 @@
++´╗┐using System;
++using System.Collections.Generic;
++using System.Linq;
++using System.Text;
++using System.Threading.Tasks;
++
++namespace hello
++{
++    class Program
++    {
++        static void Main(string[] args)
++        {
++        }
++    }
++}
+diff --git a/hello/Properties/AssemblyInfo.cs b/hello/Properties/AssemblyInfo.cs
+new file mode 100644
+index 0000000..473b520
+--- /dev/null
++++ b/hello/Properties/AssemblyInfo.cs
+@@ -0,0 +1,36 @@
++´╗┐using System.Reflection;
++using System.Runtime.CompilerServices;
++using System.Runtime.InteropServices;
++
++// General Information about an assembly is controlled through the following 
++// set of attributes. Change these attribute values to modify the information
++// associated with an assembly.
++[assembly: AssemblyTitle("hello")]
++[assembly: AssemblyDescription("")]
++[assembly: AssemblyConfiguration("")]
++[assembly: AssemblyCompany("")]
++[assembly: AssemblyProduct("hello")]
++[assembly: AssemblyCopyright("Copyright ┬®  2017")]
++[assembly: AssemblyTrademark("")]
++[assembly: AssemblyCulture("")]
++
++// Setting ComVisible to false makes the types in this assembly not visible 
++// to COM components.  If you need to access a type in this assembly from 
++// COM, set the ComVisible attribute to true on that type.
++[assembly: ComVisible(false)]
++
++// The following GUID is for the ID of the typelib if this project is exposed to COM
++[assembly: Guid("f0388065-cad5-4c07-b4ea-66db6334ee34")]
++
++// Version information for an assembly consists of the following four values:
++//
++//      Major Version
++//      Minor Version 
++//      Build Number
++//      Revision
++//
++// You can specify all the values or you can default the Build and Revision Numbers 
++// by using the '*' as shown below:
++// [assembly: AssemblyVersion("1.0.*")]
++[assembly: AssemblyVersion("1.0.0.0")]
++[assembly: AssemblyFileVersion("1.0.0.0")]
+diff --git a/hello/hello.csproj b/hello/hello.csproj
+new file mode 100644
+index 0000000..c4c0443
+--- /dev/null
++++ b/hello/hello.csproj
+@@ -0,0 +1,60 @@
++´╗┐<?xml version="1.0" encoding="utf-8"?>
++<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
++  <PropertyGroup>
++    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
++    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
++    <ProjectGuid>{F0388065-CAD5-4C07-B4EA-66DB6334EE34}</ProjectGuid>
++    <OutputType>Exe</OutputType>
++    <AppDesignerFolder>Properties</AppDesignerFolder>
++    <RootNamespace>hello</RootNamespace>
++    <AssemblyName>hello</AssemblyName>
++    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
++    <FileAlignment>512</FileAlignment>
++    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
++  </PropertyGroup>
++  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
++    <PlatformTarget>AnyCPU</PlatformTarget>
++    <DebugSymbols>true</DebugSymbols>
++    <DebugType>full</DebugType>
++    <Optimize>false</Optimize>
++    <OutputPath>bin\Debug\</OutputPath>
++    <DefineConstants>DEBUG;TRACE</DefineConstants>
++    <ErrorReport>prompt</ErrorReport>
++    <WarningLevel>4</WarningLevel>
++  </PropertyGroup>
++  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
++    <PlatformTarget>AnyCPU</PlatformTarget>
++    <DebugType>pdbonly</DebugType>
++    <Optimize>true</Optimize>
++    <OutputPath>bin\Release\</OutputPath>
++    <DefineConstants>TRACE</DefineConstants>
++    <ErrorReport>prompt</ErrorReport>
++    <WarningLevel>4</WarningLevel>
++  </PropertyGroup>
++  <ItemGroup>
++    <Reference Include="System" />
++    <Reference Include="System.Core" />
++    <Reference Include="System.Xml.Linq" />
++    <Reference Include="System.Data.DataSetExtensions" />
++    <Reference Include="Microsoft.CSharp" />
++    <Reference Include="System.Data" />
++    <Reference Include="System.Net.Http" />
++    <Reference Include="System.Xml" />
++  </ItemGroup>
++  <ItemGroup>
++    <Compile Include="Program.cs" />
++    <Compile Include="Properties\AssemblyInfo.cs" />
++  </ItemGroup>
++  <ItemGroup>
++    <None Include="App.config" />
++  </ItemGroup>
++  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
++  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
++       Other similar extension points exist, see Microsoft.Common.targets.
++  <Target Name="BeforeBuild">
++  </Target>
++  <Target Name="AfterBuild">
++  </Target>
++  -->
++</Project>
+\ No newline at end of file
+
+```
+
+Finally, to keep the repository clean in the future, a ".gitignore" file should be added.
+
+Content of ".gitignore":
+
+```
+bin/
+obj/
+.vs/
+```
+
+Add ".gitignore" to repository and commit:
+
+```
+D:\test\hello [master +1 ~0 -0 !]> git add .gitignore
+D:\test\hello [master +1 ~0 -0 ~]> git commit -m "Ignore generated files"
+[master 4013b9a] Ignore generated files
+ 1 file changed, 3 insertions(+)
+ create mode 100644 .gitignore
+```
+
+If you now open the Visual Studio solution file, you will see that Git will not discover any files anymore that are not supposed to be committed.
+
+Note for the practice that the ".gitignore" file in this example is very rudimentary and a real project will probably have several other files that shall be ignored.
+
+Important: Doing this with a published repository should be avoided as much as possible. If it is not possible to avoid this, you should inform all the people that work with this repository to let them rebase their repositories.
 
 ### With Git Extensions
 
@@ -929,6 +1323,8 @@ After that, the history should look like this:
 
 #### Rebasing
 
+##### Make diverged history linear
+
 Note: The following example was constructed to match the above CLI example. There are multiple ways to archive the same result.
 
 To rebase, select this command:
@@ -958,6 +1354,10 @@ Take care to check the checkbox "Force delete" in the "Delete branch" dialog:
 The history should look as clean as this now:
 
 ![Rebase in Git Extensions, success](images/gitext-rebase7.png)
+
+##### Correct last commit
+
+##### Delete files out of the complete history
 
 ## Handling merge conflicts
 
