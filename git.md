@@ -899,7 +899,7 @@ Note, that `-D` instead of `-d` was used, because the commits of that branch wil
 
 #### Correct last commit
 
-It happens quiet fast that an erroneous commit is made. One way to correct this is to make "correction commits" that contain messages like "Fixed typo", "Fixed build error", "Forgot to add a file" etc. This is not pretty and it is not possible this way to correct typos in the commit message itself. A common solution to this problem is `git commit --amend`.
+It happens quiet fast that an erroneous commit is made. One way to fix this is to make "correction commits" that contain messages like "Fixed typo", "Fixed build error", "Forgot to add a file" etc. This is not pretty and it is not possible this way to fix typos in the commit message itself. A common solution to this problem is `git commit --amend`.
 
 Put a file in your repository, e.g. "error.txt" with this content:
 
@@ -917,7 +917,7 @@ D:\test\repo [master +1 ~0 -0 ~]> git commit -m "Introduse errorz"
  create mode 100644 error.txt
 ```
 
-Note the manual `git add ...` before the actual commit. The command `git commit -a` only adds file to the staging area that are already tracked (meaning known to the VCS) but modified. New files are not tracked yet that is changed by manually adding the new file to the staging area.
+Note the manual `git add ...` before the actual commit. The command `git commit -a` only adds file to the staging area that are already tracked (meaning known to the VCS) but modified. New files are not tracked yet and have to be added manually to the staging area.
 
 Now let's fix this commit. The content of "errror.txt" should look as following:
 
@@ -1287,6 +1287,25 @@ Note for the practice that the ".gitignore" file in this example is very rudimen
 
 Important: Doing this with a published repository should be avoided as much as possible. If it is not possible to avoid this, you should inform all the people that work with this repository to let them rebase their repositories.
 
+## Notes to rebasing
+
+It is always a good idea to backup your repository if you attempt any rebase operations and are not sure whether you do the right thing.
+
+If it is "too late", meaning you want to `git filter-branch` a repository after it was published already (or perform other rebase operations), you should make sure that all project participants have prepared for this. This means they should:
+
+1. Published their current state of work
+2. Made backups of their repositories
+3. After you published the rewritten repository (`git push --force` will do the job), the other participants should rebase their repositories to the published rewritten one.
+   - Alternatively they can clone a fresh repository out of the rewritten central one.
+
+### Notes to `git filter-branch`
+
+`git filter-branch` is like the nuclear option (as mentioned in the ["Pro Git" book](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History)). It basically rewrites the whole repository or at least a big part of it.
+
+Make sure that you have a backup of your repository before attempting such operations.
+
+As you see in the example, `git filter-branch` can be quiet complicated. Unfortunately Git Extensions seems not to offer Filter-Branch operations but there is another tool that promises to make Filter-Branch operations much easier named [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) (not tested by the author). Especially if you have multiple repositories that have files that should never be committed, you should give it a try.
+
 ### With Git Extensions
 
 #### Fast-forward
@@ -1357,7 +1376,39 @@ The history should look as clean as this now:
 
 ##### Correct last commit
 
-##### Delete files out of the complete history
+Add a file named "error.txt" containing this content:
+
+```
+Sum errorz here
+```
+
+And commit:
+
+![Faulty commit in Git Extensions](images/gitext-commit-amend1.png)
+
+Now the commit history could look like this:
+
+![History with faulty commit in Git Extensions](images/gitext-commit-amend2.png)
+
+Now change "error.txt" that it has this content:
+
+```
+Some errors here
+```
+
+Now do an "amend commit" - check the checkbox "Amend Commit":
+
+1:
+
+![Amend commit in Git Extensions, step 1](images/gitext-commit-amend3.png)
+
+2:
+
+![Amend commit in Git Extensions, step 2](images/gitext-commit-amend4.png)
+
+After clicking on the "Commit" button and confirming a confirmation dialog the history should look like this now:
+
+![Amend commit in Git Extensions, success](images/gitext-commit-amend5.png)
 
 ## Handling merge conflicts
 
@@ -1480,13 +1531,14 @@ If you now type `git commit` only, a text editor, containing the standard merge 
 
 ```
 D:\test\repo [master +0 ~1 -0 ~]> git commit
-[master 4668544] Merge branch 'to-be-conflicted'
+[master 669d43d] Merge branch 'to-be-conflicted'
 D:\test\repo [master]> git log --oneline --graph
-*   4668544 Merge branch 'to-be-conflicted'
+*   669d43d Merge branch 'to-be-conflicted'
 |\
-| * 2459d02 Say hallo instead of hello
-* | 30c7c7c Say hola instead of hello
+| * 1c14344 Say hallo instead of hello
+* | 5c9a7bc Say hola instead of hello
 |/
+* 92eb6a5 Introduce errors
 * 418ac30 Add a test file
 * 3efacf6 Improve greeting
 * fcfa7b8 Add slave to master
@@ -1496,7 +1548,80 @@ D:\test\repo [master]> git log --oneline --graph
 
 #### With Git Extensions
 
-...
+Assume a repository with a branch "master" that contains a file "hello.txt" with this content:
+
+```
+Hello, people
+Nice to meet you
+```
+
+Checkout a new branch:
+
+![New Branch in Git Extensions 1](images/gitext-merge-conflict1.png)
+
+The new branch "to-be-conflicted" should now point to the same commit as "master" and be the current one (there is an arrow at the branch name "to-be-conflicted"):
+
+![New Branch in Git Extensions 2](images/gitext-merge-conflict2.png)
+
+Modify the file "hello.txt", e.g. by replacing "Hello" with "Hallo" and commit:
+
+![Commit change in another branch in Git Extensions](images/gitext-merge-conflict3.png)
+
+Checkout the "master" branch, edit "hello.txt again at the same place, e.g. by replacing "Hello" with "Hola" and commit:
+
+![Commit change in "master" branch in Git Extensions](images/gitext-merge-conflict4.png)
+
+Your repository should now look like this:
+
+![History with possible conflicts in Git Extensions](images/gitext-merge-conflict5.png)
+
+Now start merging:
+
+![Merge that leads to conflicts in Git Extensions 1](images/gitext-merge-conflict6.png)
+
+Select the branch to merge to the (current) "master" branch:
+
+![Merge that leads to conflicts in Git Extensions 2](images/gitext-merge-conflict7.png)
+
+After you clicked on the button "Merge", you will get first an error in the message window:
+
+![Merge that leads to conflicts in Git Extensions 3](images/gitext-merge-conflict8.png)
+
+Choose to solve the merge conflicts now:
+
+![Merge that leads to conflicts in Git Extensions 4](images/gitext-merge-conflict9.png)
+
+A dialog will appear - choose to start a merge tool:
+
+![Merge that leads to conflicts in Git Extensions 5](images/gitext-merge-conflict10.png)
+
+Usually a tool will open that is divided to three sides:
+
+1. (A) The original from which the conflicted changes originated
+2. (B) The change of the current branch ("master" in this case)
+3. (C) The change of the other branch ("to-be-conflicted" in this case)
+
+![Merge that leads to conflicts in Git Extensions 6](images/gitext-merge-conflict11.png)
+
+Let's say that both changes are not good and choose that original version:
+
+![Merge that leads to conflicts in Git Extensions 7](images/gitext-merge-conflict12.png)
+
+And save:
+
+![Merge that leads to conflicts in Git Extensions 8](images/gitext-merge-conflict13.png)
+
+After you closed the merge tool window, a confirmation dialog appears whether you want to commit:
+
+![Merge that leads to conflicts in Git Extensions 9](images/gitext-merge-conflict14.png)
+
+Add the file "hello.txt.orig" to the staging area and commit:
+
+![Merge that leads to conflicts in Git Extensions 10](images/gitext-merge-conflict15.png)
+
+After successfully merging and committing, your commit history should look like this:
+
+![Merge that leads to conflicts in Git Extensions 11](images/gitext-merge-conflict16.png)
 
 # Working with central repositories
 
@@ -1512,7 +1637,11 @@ A personal Git repository is nothing more then a directory that contains a subdi
 
 # Additional tools
 
+## [Git Extensions](http://gitextensions.github.io/) (of course)
+
 ## [posh-git](https://github.com/dahlbyk/posh-git)
+
+## [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/)
 
 # Sources
 
