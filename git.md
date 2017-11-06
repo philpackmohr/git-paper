@@ -978,7 +978,7 @@ D:\test\hello [master +15 ~0 -0 ~]> git commit -m Initialize
  create mode 100644 hello/obj/Debug/hello.csproj.FileListAbsolute.txt
 ```
 
-You see in the output of `git commit` that there are already files that you do not want to commit usually. But we go further: add some content to the file "Program.cs" - e.g. like this:
+You see in the output of `git commit` that there are already files that should not be committed usually. But we go further: add some content to the file "Program.cs" - e.g. like this:
 
 ```csharp
 using System;
@@ -1291,7 +1291,7 @@ Important: Doing this with a published repository should be avoided as much as p
 
 It is always a good idea to backup your repository if you attempt any rebase operations and are not sure whether you do the right thing.
 
-If it is "too late", meaning you want to `git filter-branch` a repository after it was published already (or perform other rebase operations), you should make sure that all project participants have prepared for this. This means they should:
+If you want to `git filter-branch` a repository after it was published already (or perform other rebase operations), you should make sure that all project participants are prepared for this. This means they should:
 
 1. Published their current state of work
 2. Made backups of their repositories
@@ -1300,11 +1300,11 @@ If it is "too late", meaning you want to `git filter-branch` a repository after 
 
 ### Notes to `git filter-branch`
 
-`git filter-branch` is like the nuclear option (as mentioned in the ["Pro Git" book](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History)). It basically rewrites the whole repository or at least a big part of it.
+`git filter-branch` is considered the nuclear option (as mentioned in the ["Pro Git" book](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History)). It basically rewrites the whole repository or at least a big part of it.
 
 Make sure that you have a backup of your repository before attempting such operations.
 
-As you see in the example, `git filter-branch` can be quiet complicated. Unfortunately Git Extensions seems not to offer Filter-Branch operations but there is another tool that promises to make Filter-Branch operations much easier named [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) (not tested by the author). Especially if you have multiple repositories that have files that should never be committed, you should give it a try.
+As you see in the example, `git filter-branch` can be quiet complicated. Unfortunately Git Extensions seems not to offer Filter-Branch operations but there is another tool that promises to make Filter-Branch operations much easier named [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) (not tested by the author). You should try it especially if you have multiple repositories containing files that should never be committed.
 
 ### With Git Extensions
 
@@ -1623,11 +1623,221 @@ After successfully merging and committing, your commit history should look like 
 
 ![Merge that leads to conflicts in Git Extensions 11](images/gitext-merge-conflict16.png)
 
-# Working with central repositories
+# Working with remote repositories
+
+To work with other people on the same project you need a version of you repository that is reachable by all participants. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote one does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some (specialized) HTTP server, a network file share or even on your local machine.
+
+To publish your work on a remote repository, it must be registered in your personal repository. It is possible to have multiple remote repositories registered. Each remote repository has an alias name e.g. "origin". If you clone a personal repository from a remote one, the remote is registered automatically as "origin". The name "origin" is just the default one of the remote repository where you cloned from. Besides of this the name "origin" has no special meaning and you are free to rename it to your preferences (though most people do not mind the default).
+
+Refer book "Pro Git", [chapter 4.1 Git on the Server - The Protocols](https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols) (and following chapters) for possibilities to setup a central repository.
+
+## Basic commands
+
+### `git init --bare`
+
+Initializes a new "remote" repository in the current directory.
+
+### `git clone {URL} {directory}
+
+Creates a new directory `{directory}` in the current directory and clones the remote repository under `{URL}` there. The remote repository gets registered with name "origin" automatically.
+
+### `git push {remote name} {branch name}`
+
+Pushes the current state of branch `{branch name}` to the remote repository with name `{remote name}`.
+
+### `git fetch {remote name}`
+
+Fetches the content of the remote repository with name `{remote name}` to the personal one. Your local branches are not touched by this operation, meaning you have to merge your local branches to the corresponding remote branches manually.
+
+### `git pull {remote name}`
+
+Fetches the content of the remote repository with name `{remote name}` to the personal one and merges the local current branch to the corresponding remote one. Basically it behaves like `git fetch {remote name} followed by `git merge {remote branch name}`.
+
+If you want that your local branch is not merged with the last state of the remote branch but based on it in the history, you can say `git pull --rebase {remote name}`. This rebases your local branch to the last commit of the remote branch.
+
+## Example
+
+Make a new repository named "personal1":
+
+```
+D:\test> mkdir personal1
+
+# ...
+
+D:\test> cd personal1
+D:\test\personal1> git init
+Initialized empty Git repository in D:/test/personal1/.git/
+```
+
+Create a file, e.g. "hello.txt" with this content:
+
+```
+Hello, world!
+```
+
+Commit:
+
+```
+D:\test\personal1 [master]> git add hello.txt
+D:\test\personal1 [master +1 ~0 -0 ~]> git commit -m "Initialize"
+[master (root-commit) 9e347be] Initialize
+ 1 file changed, 1 insertion(+)
+ create mode 100644 hello.txt
+```
+
+Now create a "remote" repository on your local file system (there is no difference to a remote repository that lies somewhere in the network):
+
+```
+D:\test> mkdir central.git
+
+# ...
+
+D:\test> cd central.git
+D:\test\central.git> git init --bare
+Initialized empty Git repository in D:/test/central.git/
+```
+
+Note that the directory containing the remote repository ends with ".git". It is a convention to end "bare" repositories (the kind that is used for remote repositories) with ".git" while personal repositories have no extension. As [mentioned in StackOverflow](https://stackoverflow.com/a/11069413), Git has some little convenience functionality regarding to the ".git" extension. But there is no technical reason to put the ".git" extension to the remote repository name.
+
+Register the fresh remote repository in the personal repository:
+
+```
+D:\test\central [BARE:master]> cd ..\personal1
+D:\test\personal1 [master]> git remote add origin D:/test/central/
+```
+
+Note the slashes "`/` " instead of backslashes "`\`" in the windows path to the remote repository. Slashes should be preferred because it can be problematic using backslashes while slashes in remote URLs do not make any problems.
+
+Now the data in the personal repository can be "pushed":
+
+```
+D:\test\personal1 [master]> git push origin master
+Counting objects: 3, done.
+Writing objects: 100% (3/3), 238 bytes | 0 bytes/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To D:/test/central/
+ * [new branch]      master -> master
+```
+
+A `git log` in the central repository will now look exactly like `git log in your personal one:
+
+```
+D:\test\personal1 [master]> git log
+commit 9e347be6c7d02c7790d98a66cdce45941e841eb4
+Author: Christian Dreier <christian.dreier@csa-germany.de>
+Date:   Mon Nov 6 11:19:52 2017 +0100
+
+    Initialize
+D:\test\personal1 [master]> cd ..\central
+D:\test\central [BARE:master]> git log
+commit 9e347be6c7d02c7790d98a66cdce45941e841eb4
+Author: Christian Dreier <christian.dreier@csa-germany.de>
+Date:   Mon Nov 6 11:19:52 2017 +0100
+
+    Initialize
+```
+
+The way in this example to make a central repository out of an existing personal one is quiet cumbersome. The commands
+
+- `mkdir central.git`
+- `cd central.git` and
+- `git push origin master` (to be done with the personal repository as current directory)
+
+can be abbreviated by the single line `git clone --bare .\personal1 central-test.git`. But the new remote repository must be still registered in the personal one.
+
+Now clone a second personal repository out of the remote one:
+
+```
+D:\test> git clone central.git personal2
+Cloning into 'personal2'...
+done.
+```
+
+You will see that the cloned personal repository has registered the remote repository already and that its state is identical to the remote repository and the other personal one:
+
+```
+D:\test> cd personal2
+D:\test\personal2 [master =]> git remote show origin
+* remote origin
+  Fetch URL: D:/test/central.git
+  Push  URL: D:/test/central.git
+  HEAD branch: master
+  Remote branch:
+    master tracked
+  Local branch configured for 'git pull':
+    master merges with remote master
+  Local ref configured for 'git push':
+    master pushes to master (up to date)
+D:\test\personal2 [master =]> git log
+commit 9e347be6c7d02c7790d98a66cdce45941e841eb4
+Author: Christian Dreier <christian.dreier@csa-germany.de>
+Date:   Mon Nov 6 11:19:52 2017 +0100
+
+    Initialize
+```
 
 # Workflows
 
-## Practice
+## Branching
+
+In traditional centralized VCSs is it usual to have a single line of history where all participants commit their changes on. Quite often, these commits introduce bugs and build errors. Sometimes, a big release is made and then a branch is created to stabilize the software for the release. This happens quiet seldom - 1 to 2 times a year - because creating a branch is very heavyweight traditionally (though modern iterations of certain centralized VCSs are optimized, e.g. Subversion) and can make additional problems depending on the project.
+
+In contrast, branching in Git is very lightweight and merging is usually not much a problem too. Because of this, there evolved many workflows that take advantage of branching. It can be supposed that each team has not only its own individual workflow, they could differentiate even between projects of the same team. The complexity of most workflows lingers between 2 extremes:
+
+- "Master only workflow"
+- [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) (though more complexity is always possible)
+
+Most workflows consist of one or more eternal living branches differentiated by their stability and temporary feature and bugfix branches. It seems most appropriate to decide for each project individually which workflow will be used. Refer to [an overview of different workflows](http://blog.endpoint.com/2014/05/git-workflows-that-work.html) for more information.
+
+
+### "Master only workflow"
+
+That is the most simple workflow and can be appropriate for individuals or very small teams if either:
+
+- If breaking changes can be accepted
+- There is another mechanism to ensure that the customers do not get faulty versions, e.g. a QA team tests the changes that are pushed by the developers and they deploy these to the customers
+
+### [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/)
+
+This workflow consists of:
+
+- An eternal "master" or "production" branch that contains the software versions that the customers get.
+- An eternal "develop" branch that contains the current state of development.
+- Temporary feature branches (one for each feature) - they get merged and then deleted after the feature is completed.
+- A temporary release branch. A release branch is branched off the development branch right before a release and exists to make sure that the feature to deliver are stable actually. Bugfixes done there are merged back to "develop". After the state of the release branch can be considered stable, it gets merged with "master" and then deleted.
+- If necessary, a temporary "hotfix" branch to fix bugs in releases. After the hotfix is implemented, the corresponding branch gets merged with "master" and "develop" and then deleted.
+
+Refer [the blog post on GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) for more information. It seems very appropriate for software that is packaged every few months or so.
+
+### Other workflows
+
+While the "Master only workflow" can be considered too simple, [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) seems too complex for many people, e.g. [the GitHub team](http://scottchacon.com/2011/08/31/github-flow.html). Generally a workflow should not be too complicated but should also support you to ensure the required quality of the software.
+
+## Remote repositories in teams
+
+Usually a project has a repository that is considered central - the "blessed repository". There are three common basic models to manage the blessed repository
+
+- Have 1 central repository that is used by everyone
+- 1 central repository again but managed by a dedicated integration manger
+- Multiple people pull the changes of the developers and pass the changes to a "benevolent dictator"
+
+### Centralized
+
+![Centralized repository](images/centralized.svg)
+
+There is only one public repository where everyone pushes to. This model may not be appropriate if there are too many developers working on the project.
+
+### Integration Manager
+
+![Integration manager model](images/integration-manager.svg)
+
+Every developer has additionally to his private repository a public one. The blessed repository is managed by a dedicated "integration manager". The developers publish their changes to their own public repositories and send "pull requests" to the integration manager who merges these changes to the blessed repository. The integration manager can enforce all kinds of rules this way. But if the project gets too big, the integration manager can be overburdened with all the pull requests that he gets constantly.
+
+### Benevolent Dictator
+
+![Benevolent Dictator model](images/benevolent-dictator.svg)
+
+A model that seems appropriate for very big teams (it used by the Linux kernel developers - Linus Torvalds is the benevolent dictator). Like in the integration manager model, every developer has his own public repository additionally to his private one and the blessed public one. Pull requests are not sent to the "dictator" but to his "lieutenants". They filter the pull requests that do not fit to the requirements and rules and are able to pass pull requests from multiple developers as one pull request.
 
 # Some technical background
 
@@ -1645,6 +1855,20 @@ A personal Git repository is nothing more then a directory that contains a subdi
 
 # Sources
 
+## General
+
 [Git workshop of Alexander Groß](https://github.com/agross/git-reveal)
 
 [Book "Pro Git"](https://git-scm.com/book/en/v2)
+
+## Remote repositories
+
+[Blog entry "What is a bare git repository?" by Jon Saints](http://www.saintsjd.com/2011/01/what-is-a-bare-git-repository/)
+
+[StackOverflow comment to the ".git" extension in remote repository names](https://stackoverflow.com/a/11069413)
+
+## Git workflows
+
+[Blog entry to "GitFlow"](http://nvie.com/posts/a-successful-git-branching-model/)
+
+[Blog entry giving an overview to different workflows](http://blog.endpoint.com/2014/05/git-workflows-that-work.html)
