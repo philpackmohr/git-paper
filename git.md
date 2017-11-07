@@ -1625,9 +1625,9 @@ After successfully merging and committing, your commit history should look like 
 
 # Working with remote repositories
 
-To work with other people on the same project you need a version of you repository that is reachable by all participants. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote one does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some (specialized) HTTP server, a network file share or even on your local machine.
+To work with other people on the same project you need repository that is reachable by all participants - a remote repository. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote one does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some HTTP server, a network file share or even on your local machine.
 
-To publish your work on a remote repository, it must be registered in your personal repository. It is possible to have multiple remote repositories registered. Each remote repository has an alias name e.g. "origin". If you clone a personal repository from a remote one, the remote is registered automatically as "origin". The name "origin" is just the default one of the remote repository where you cloned from. Besides of this the name "origin" has no special meaning and you are free to rename it to your preferences (though most people do not mind the default).
+To publish your work on a remote repository, it must be registered in your personal repository. It is possible to have multiple remote repositories registered. Each remote repository has an alias name e.g. "origin". If you clone a personal repository from a remote one, the remote is registered automatically as "origin". The name "origin" is just the default one of the remote repository where you cloned from. Besides of this the name, "origin" has no special meaning and you are free to rename it to your preferences (though most people do not mind the default).
 
 Refer book "Pro Git", [chapter 4.1 Git on the Server - The Protocols](https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols) (and following chapters) for possibilities to setup a central repository.
 
@@ -1639,7 +1639,7 @@ Initializes a new "remote" repository in the current directory.
 
 ### `git clone {URL} {directory}
 
-Creates a new directory `{directory}` in the current directory and clones the remote repository under `{URL}` there. The remote repository gets registered with name "origin" automatically.
+Creates a new directory `{directory}` in the current directory and clones there the remote repository under `{URL}`. The remote repository gets registered with name "origin" automatically.
 
 ### `git push {remote name} {branch name}`
 
@@ -1651,7 +1651,7 @@ Fetches the content of the remote repository with name `{remote name}` to the pe
 
 ### `git pull {remote name}`
 
-Fetches the content of the remote repository with name `{remote name}` to the personal one and merges the local current branch to the corresponding remote one. Basically it behaves like `git fetch {remote name} followed by `git merge {remote branch name}`.
+Fetches the content of the remote repository with name `{remote name}` to the personal one and merges the local current branch to the corresponding remote one. Basically it behaves like `git fetch {remote name}` followed by `git merge {remote branch name}`.
 
 If you want that your local branch is not merged with the last state of the remote branch but based on it in the history, you can say `git pull --rebase {remote name}`. This rebases your local branch to the last commit of the remote branch.
 
@@ -1685,7 +1685,7 @@ D:\test\personal1 [master +1 ~0 -0 ~]> git commit -m "Initialize"
  create mode 100644 hello.txt
 ```
 
-Now create a "remote" repository on your local file system (there is no difference to a remote repository that lies somewhere in the network):
+Now create a "remote" repository on your local file system (there is no difference to a remote repository that lies somewhere in the network that matters for this example):
 
 ```
 D:\test> mkdir central.git
@@ -1697,7 +1697,7 @@ D:\test\central.git> git init --bare
 Initialized empty Git repository in D:/test/central.git/
 ```
 
-Note that the directory containing the remote repository ends with ".git". It is a convention to end "bare" repositories (the kind that is used for remote repositories) with ".git" while personal repositories have no extension. As [mentioned in StackOverflow](https://stackoverflow.com/a/11069413), Git has some little convenience functionality regarding to the ".git" extension. But there is no technical reason to put the ".git" extension to the remote repository name.
+Note that the directory containing the remote repository ends with ".git". It is a convention to end "bare" repositories (the kind that is used for remote repositories) with ".git" while personal repositories have no extension. As [mentioned in StackOverflow](https://stackoverflow.com/a/11069413), Git has some little convenience functionality regarding to the ".git" extension. But there is no technical reason to end the remote repository name with ".git".
 
 Register the fresh remote repository in the personal repository:
 
@@ -1706,7 +1706,7 @@ D:\test\central [BARE:master]> cd ..\personal1
 D:\test\personal1 [master]> git remote add origin D:/test/central/
 ```
 
-Note the slashes "`/` " instead of backslashes "`\`" in the windows path to the remote repository. Slashes should be preferred because it can be problematic using backslashes while slashes in remote URLs do not make any problems.
+Note the slashes "`/` " instead of backslashes "`\`" in the windows path to the remote repository. Slashes should be preferred because it can be problematic using backslashes while slashes in remote URLs do not make any problems in any situation.
 
 Now the data in the personal repository can be "pushed":
 
@@ -1719,7 +1719,7 @@ To D:/test/central/
  * [new branch]      master -> master
 ```
 
-A `git log` in the central repository will now look exactly like `git log in your personal one:
+A `git log` in the central repository will now look exactly as `git log in your personal one:
 
 ```
 D:\test\personal1 [master]> git log
@@ -1743,7 +1743,7 @@ The way in this example to make a central repository out of an existing personal
 - `cd central.git` and
 - `git push origin master` (to be done with the personal repository as current directory)
 
-can be abbreviated by the single line `git clone --bare .\personal1 central-test.git`. But the new remote repository must be still registered in the personal one.
+can be abbreviated by the single line `git clone --bare .\personal1 central-repo.git`. But the new remote repository has to be still registered in the personal one.
 
 Now clone a second personal repository out of the remote one:
 
@@ -1780,9 +1780,9 @@ Date:   Mon Nov 6 11:19:52 2017 +0100
 
 ## Branching
 
-In traditional centralized VCSs is it usual to have a single line of history where all participants commit their changes on. Quite often, these commits introduce bugs and build errors. Sometimes, a big release is made and then a branch is created to stabilize the software for the release. This happens quiet seldom - 1 to 2 times a year - because creating a branch is very heavyweight traditionally (though modern iterations of certain centralized VCSs are optimized, e.g. Subversion) and can make additional problems depending on the project.
+In traditional centralized VCSs is it usual to have a single line of history where all participants commit their changes on. Quite often, these commits introduce bugs and build errors. Occasionally a branch is created to stabilize the software for a release. This happens quiet seldom - 1 to 2 times a year - because creating a branch is very heavyweight traditionally (though modern iterations of certain centralized VCSs are optimized, e.g. Subversion) and can make additional problems depending on the project.
 
-In contrast, branching in Git is very lightweight and merging is usually not much a problem too. Because of this, there evolved many workflows that take advantage of branching. It can be supposed that each team has not only its own individual workflow, they could differentiate even between projects of the same team. The complexity of most workflows lingers between 2 extremes:
+In contrast, branching in Git is very lightweight and merging is usually not much a problem too. Because of this, there evolved many workflows that take advantage of branching. It can be supposed that each team has not only its own individual workflow, they could even be differences between projects of the same team. The complexity of most workflows lingers between 2 extremes:
 
 - "Master only workflow"
 - [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) (though more complexity is always possible)
@@ -1795,7 +1795,7 @@ Most workflows consist of one or more eternal living branches differentiated by 
 That is the most simple workflow and can be appropriate for individuals or very small teams if either:
 
 - If breaking changes can be accepted
-- There is another mechanism to ensure that the customers do not get faulty versions, e.g. a QA team tests the changes that are pushed by the developers and they deploy these to the customers
+- There is another mechanism to ensure that the customers do not get faulty versions, e.g. a QA team tests the changes that are pushed by the developers and ensure that the customers get only tested and fixed versions.
 
 ### [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/)
 
@@ -1804,22 +1804,22 @@ This workflow consists of:
 - An eternal "master" or "production" branch that contains the software versions that the customers get.
 - An eternal "develop" branch that contains the current state of development.
 - Temporary feature branches (one for each feature) - they get merged and then deleted after the feature is completed.
-- A temporary release branch. A release branch is branched off the development branch right before a release and exists to make sure that the feature to deliver are stable actually. Bugfixes done there are merged back to "develop". After the state of the release branch can be considered stable, it gets merged with "master" and then deleted.
+- A temporary release branch. A release branch is branched off of the development branch right before a release and exists to make sure that the feature set to deliver is stable actually. Bugfixes done there are merged back to "develop". After the state of the release branch can be considered stable, it gets merged with "master" and then deleted.
 - If necessary, a temporary "hotfix" branch to fix bugs in releases. After the hotfix is implemented, the corresponding branch gets merged with "master" and "develop" and then deleted.
 
-Refer [the blog post on GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) for more information. It seems very appropriate for software that is packaged every few months or so.
+Refer [the blog post on GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) for more information and a diagram (that is drawn in the wrong direction). It seems to be appropriate to base your workflow on GitFlow if you release your software packaged every few months.
 
 ### Other workflows
 
-While the "Master only workflow" can be considered too simple, [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) seems too complex for many people, e.g. [the GitHub team](http://scottchacon.com/2011/08/31/github-flow.html). Generally a workflow should not be too complicated but should also support you to ensure the required quality of the software.
+While the "Master only workflow" can be considered too simple, [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) is perceived as too complex by many people, e.g. [the GitHub team](http://scottchacon.com/2011/08/31/github-flow.html). Generally a workflow should not be too complicated but should also support you ensuring the required quality of the software.
 
 ## Remote repositories in teams
 
-Usually a project has a repository that is considered central - the "blessed repository". There are three common basic models to manage the blessed repository
+Usually a project has a repository that is considered central - the "blessed repository". There are three common basic models to manage the blessed repository:
 
-- Have 1 central repository that is used by everyone
-- 1 central repository again but managed by a dedicated integration manger
-- Multiple people pull the changes of the developers and pass the changes to a "benevolent dictator"
+- Have 1 public repository that is used by everyone.
+- An integration manager pulls the changes of each developer and merges them to a blessed repository, managed by him only.
+- Multiple people pull the changes of the developers and pass the changes to a "benevolent dictator".
 
 ### Centralized
 
@@ -1831,19 +1831,96 @@ There is only one public repository where everyone pushes to. This model may not
 
 ![Integration manager model](images/integration-manager.svg)
 
-Every developer has additionally to his private repository a public one. The blessed repository is managed by a dedicated "integration manager". The developers publish their changes to their own public repositories and send "pull requests" to the integration manager who merges these changes to the blessed repository. The integration manager can enforce all kinds of rules this way. But if the project gets too big, the integration manager can be overburdened with all the pull requests that he gets constantly.
+Every developer has additionally to his private repository a public one. The blessed repository is managed by a dedicated "integration manager". The developers publish their changes to their own public repositories and send "pull requests" to the integration manager who merges these changes to the blessed repository. The integration manager can enforce all kinds of policies this way. But if the project gets too big, the integration manager can be overburdened with all the pull requests that he gets constantly.
 
 ### Benevolent Dictator
 
 ![Benevolent Dictator model](images/benevolent-dictator.svg)
 
-A model that seems appropriate for very big teams (it used by the Linux kernel developers - Linus Torvalds is the benevolent dictator). Like in the integration manager model, every developer has his own public repository additionally to his private one and the blessed public one. Pull requests are not sent to the "dictator" but to his "lieutenants". They filter the pull requests that do not fit to the requirements and rules and are able to pass pull requests from multiple developers as one pull request.
+A model that seems appropriate for very bigger teams (it used by the Linux kernel developers - Linus Torvalds is the benevolent dictator). Like in the integration manager model, every developer has his own public repository additionally to his private one and the blessed public one. Pull requests are not sent to the "dictator" but to his "lieutenants". They filter the pull requests that do not fit to the requirements and rules and are able to pass pull requests from multiple developers as one pull request. It is possible that the lieutenants have sub-lieutenants and they could have sub-sub-lieutenants and so on.
 
-# Some technical background
+# Technical background
 
-## About repositories
+A personal Git repository is nothing more then a directory that contains a subdirectory named ".git" and content of the working copy. This subdirectory contains all the data of the repository. If you delete this ".git" subdirectory, your whole repository is gone with that.
 
-A personal Git repository is nothing more then a directory that contains a subdirectory named ".git" and with certain content. This subdirectory contains all the information about the repository.
+One could imagine that Git (or every VCS) stores the revision history this way:
+
+![Delta storage in VCS](images/delta-storage.svg)
+
+The whole content of a file is stored only at the beginning, when the file is added to the VCS. After that, only differences are stored. To get the file content of a specific revision, all patches between file creation and the specified revision have to applied. This algorithm is much too slow! Instead, Git sores always the whole content of changed files and generate differences on demand:
+
+![Snapshot storage in VCS](images/snapshot-storage.svg)
+
+If a file is not changed in a particular revision, the revision contains only a pointer to the file in an earlier revision. Git goes one step further and addresses files only by their content - so any two (or more) files that have the same content are stored only once in the repository - no matter whether redundancy is in the working copy, through revisions or both.
+
+All the repository data consists of "objects" and pointers. An object is just a bunch of compressed binary data addressed by the SHA1 hash sum of its compressed content. There are four different types of objects (as mentioned in the [Git User Manual](https://www.kernel.org/pub/software/scm/git/docs/user-manual.html#the-object-database)):
+
+- Blob objects
+- Tree objects
+- Commit objects
+- Tag objects
+
+## Commit objects
+
+Typing `git show -s --pretty=raw` will show you all the information that is stored to the last commit:
+
+```
+$ git show -s --pretty=raw
+commit 979003eeb9103b19598264706849b07a8b1b1a5c
+tree a59deb234d64022d6c0819af7713cff6dc23971d
+parent 7e8d078c3e6b01553117e2a3ad2c3121dd8e3bdb
+author Christian Dreier <christian.dreier@csa-germany.de> 1509720746 +0100
+committer Christian Dreier <christian.dreier@csa-germany.de> 1509721335 +0100
+
+    Introduce errors
+```
+
+As you see in this output, a commit consists of these data fields:
+
+- Tree: Every commit has a reference to a "tree" object. A tree object represents the contents of a directory - in this case the working copy at commit time. More details described below.
+- Parent: The "parent" commit object.
+- Author, committer: The one who is responsible for the change. It is possible the author and committer are different, e.g. if a patch was sent by e-mail by one to another person and the other person committed that patch.
+- Message: The commit message.
+
+The whole revision history consists of commits that are linked to a [directed acyclic graph](https://www.kernel.org/pub/software/scm/git/docs/user-manual.html#def_DAG). Every commit references the parent commit but no child commits. The first commit of the repository has no parent - the parent hash sum there consists of zeros.
+
+![Commits linked to represent history](images/commit-history.svg)
+
+The hash sum of the commit is calculated by all information mentioned above. Because the parent commit will be considered for the hash sum too, you cannot change any commit without changing the hash sums of all their child commits.
+
+## Tree objects
+
+A tree object represents the contents of a directory. It contains a mapping between object hashes and their corresponding file names. Additionally every entry contains the object type and the file mode in Unix notation.
+
+A blob object represents the contents of a file. A tree object represents the contents of a subdirectory.
+
+`git ls-tree {SHA1 hash of a tree object}` will show you its content:
+
+```
+$ git ls-tree a59deb234d64022d6c0819af7713cff6dc23971d
+100644 blob 80afb3df9615768b50e0b30812311ec1d35370f6    error.txt
+100644 blob a4b8912a0dd148a87e67c0d6a8425b633a02849a    hello.txt
+100644 blob fbfc032c013143115556e1d9c059e4fa690dee19    slave.txt
+100644 blob e8551ad3ddb4bb1e3e913a25594a98a83f4effc4    test.txt
+```
+
+## Blob objects
+
+Just a binary blob of data, originated from a file and named after the SHA1 hash of its compressed content (plus a header inserted by Git - because of this, the SHA1 of the content is not identical to the SHA1 generated by Git). It does not refer to anything else in the repository.
+
+To show the content of a blob object you can use `git show {blob SHA1}`:
+
+```
+$ git show a4b8912a0dd148a87e67c0d6a8425b633a02849a
+Hello, people
+Nice to see you!
+```
+
+## Tag objects
+
+...
+
+## Pointers everywhere!
 
 # Additional tools
 
@@ -1860,6 +1937,8 @@ A personal Git repository is nothing more then a directory that contains a subdi
 [Git workshop of Alexander Groß](https://github.com/agross/git-reveal)
 
 [Book "Pro Git"](https://git-scm.com/book/en/v2)
+
+[Git User Manual](https://www.kernel.org/pub/software/scm/git/docs/user-manual.html)
 
 ## Remote repositories
 
