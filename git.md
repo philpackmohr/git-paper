@@ -1,6 +1,8 @@
-# Basics
+![Git logo](images/git-logo.svg)
 
 Commit often, perfect later, publish once
+
+# Basics
 
 ## Comparison to other version control systems
 
@@ -31,7 +33,17 @@ Working with Git is much more easy and pleasant if you know some principles:
 
 - All operations are done on the "current" branch (the branch that was checked out the last time).
 - Most operations should be done with a clean working directory. This means that there should be no modifications since the last commit.
-- As long as you did not publish your commits to a central one, you can change almost all of them. You can even change the order of the commits, split a commit or combine them (these are so called "rebase" operations). But do not such things on published commits if there is not a *very* good reason for that and even then you must discuss this with all people that work on the repository. If you do not follow this advice you and/or your colleagues will be irritated very much and you could be hated by all of them. 
+- As long as you did not publish your commits to a central one, you can change almost all of them. You can even change the order of the commits, split a commit or combine them (these are so called "rebase" operations). But do not such things on published commits if there is not a *very* good reason for that and even then you must discuss this with all people that work on the repository. If you do not follow this advice you and/or your colleagues will be irritated very much and you could be hated by all of them.
+
+#### Lifecycle of a file
+
+![Lifecycle of a file in a Git repository](images/lifecycle.svg)
+
+If you create a file, it is first in the state "untracked". A commit will only persist files that are in the state "staged", meaning they are added to the "staging area" (synonym: "index"). Because of this, they must be "added" to the staging area.
+
+If you modify a file that is tracked already (no matter whether it is staged only or already part of a commit), it gets the state "modified". Though a "modified" file has to be added by the same command `git add` too, it is different to the "untracked" state - e.g. the `.gitignore` file will only affect files that are "untracked" yet.
+
+If you make a commit, the "staged" files get the state "unmodified". "Unmodified" files are not considered for the next commit. If an "unmodified" file gets "modified" it has to be added to the staging area again before the next commit is done (as long as the next commit shall contain these changes).
 
 ### First steps
 
@@ -53,7 +65,7 @@ $ git <verb> --help
 #### Create a new repository
 
 ```
-PS D:\test\repo> git init
+$ git init
 Initialized empty Git repository in D:/test/repo/.git/
 ```
 
@@ -88,7 +100,7 @@ Add some text file to your repository directory (in this example the file is nam
 Typing `git status` now will give you this output:
 
 ```
-PS D:\test\repo> git status
+$ git status
 On branch master
 
 Initial commit
@@ -108,7 +120,7 @@ In Git Extensions you see this:
 "Untracked" means that the file is not part of the repository yet. To add the file to the repository:
 
 ```
-PS D:\test\repo> git add hello.txt
+$ git add hello.txt
 ```
 
 Alternatively you can type `git add .` but you should learn to use the ".gitignore" file before using this command.
@@ -116,7 +128,7 @@ Alternatively you can type `git add .` but you should learn to use the ".gitigno
 To make a commit:
 
 ```
-PS D:\test\repo> git commit -m "My first commit"
+$ git commit -m "My first commit"
 [master (root-commit) 15cc061] My first commit
  1 file changed, 1 insertion(+)
  create mode 100644 hello.txt
@@ -125,7 +137,7 @@ PS D:\test\repo> git commit -m "My first commit"
 The repository contains now exactly one commit. Typing `git status` will give you this output now:
 
 ```
-PS D:\test\repo> git commit -m "My first commit"
+$ git commit -m "My first commit"
 [master (root-commit) 15cc061] My first commit
  1 file changed, 1 insertion(+)
  create mode 100644 hello.txt
@@ -160,7 +172,7 @@ After confirming the message window, the Git Extensions main window should look 
 A `git status` after a file is modified will look like this:
 
 ```
-PS D:\test\repo> git status
+$ git status
 On branch master
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
@@ -176,13 +188,13 @@ Note that Git does say nothing about "untracked" but something about "Changes no
 First, "stage" the file:
 
 ```
-PS D:\test\repo> git add hello.txt
+$ git add hello.txt
 ```
 
 A `git status` will show that the file is ready to be committed as "modified". The actual commit is also very similar:
 
 ```
-PS D:\test\repo> git commit -m "Modify a file"
+$ git commit -m "Modify a file"
 [master 38b223d] Modify a file
  1 file changed, 1 insertion(+), 1 deletion(-)
 ```
@@ -193,7 +205,7 @@ Much like as the CLI, committing a modified file is very similar to committing a
 
 #### Add a .gitignore file
 
-You should add a file named `.gitignore` in the root directory of your project at the very beginning - ideally with the first commit. On [GitHub](https://github.com/github/gitignore) is a large collection of .gitignore files. These files cover almost all junk files that can be generated by certain languages and/or environments.
+You should add a file named `.gitignore` in the root directory of your project at the very beginning - ideally with the first commit. On [GitHub](https://github.com/github/gitignore) is a large collection of .gitignore files. These files cover almost all junk files that can be generated by certain development environments.
 
 This is the ".gitignore" template for Visual Studio:
 
@@ -505,6 +517,8 @@ __pycache__/
 OpenCover/
 ```
 
+Note that the `.gitignore` file has only affect to files that are in "untracked" state yet. Files that are added to earlier commits already, are in state modified and the `.gitignore` file has no effect as long as these files are not "untracked".
+
 # Branching
 
 ## Introduction
@@ -528,7 +542,7 @@ One branch is always created with the first commit and has the default name "mas
 To add a new branch in the repository, you just type:
 
 ```
-PS D:\test\repo> git branch topic
+$ git branch topic
 ```
 
 `topic` is just a name that can be chosen freely.
@@ -542,7 +556,7 @@ You see that the repository contains now an additional branch but the HEAD point
 To actually switch the branch:
 
 ```
-PS D:\test\repo> git checkout topic
+$ git checkout topic
 Switched to branch 'topic'
 ```
 
@@ -550,11 +564,11 @@ The repository state should be now like this:
 
 ![History after switching the branch](images/4-switch-branch.svg)
 
-The commands `git branch XXX` and `git checkout XXX` can be combined to:
+The commands `git branch {branch name}` and `git checkout {branch name}` can be combined to:
 
 ```
-PS D:\test\repo> git checkout -b XXX
-Switched to a new branch 'XXX'
+$ git checkout -b {branch name}
+Switched to a new branch '{branch name}'
 ```
 
 ## Committing on branches
@@ -567,7 +581,7 @@ The "current" branch pointer advances with your commits while other branch point
 
 ![Switched back to master](images/6-back-to-master.svg)
 
-If you now make a commit on the "master" branch, the history will diverge:
+If you make a commit on the "master" branch now, the history will diverge:
 
 ![Diverged history](images/7-advance-master.svg)
 
@@ -576,7 +590,7 @@ If you now make a commit on the "master" branch, the history will diverge:
 Assuming your repository has this log (played through the "First steps" example):
 
 ```
-PS D:\test\repo> git log --oneline
+$ git log --oneline
 25632ea Modify a file
 3dc35b9 My first commit
 ```
@@ -584,7 +598,7 @@ PS D:\test\repo> git log --oneline
 Typing `git branch` inside your repository should give you this output:
 
 ```
-PS D:\test\repo> git branch
+$ git branch
 * master
 ```
 
@@ -593,7 +607,7 @@ The repository contains two commits in the "master" branch. The "master" branch 
 Make a new branch and set the HEAD pointer to it:
 
 ```
-PS D:\test\repo> git checkout -b my-test
+$ git checkout -b my-test
 Switched to a new branch 'my-test'
 ```
 
@@ -602,13 +616,13 @@ Create a new file, e.g. "test.txt".
 Add this new file to the repository:
 
 ```
-PS D:\test\repo> git add test.txt
+$ git add test.txt
 ```
 
 And commit:
 
 ```
-PS D:\test\repo> git commit -m "Add a test file"
+$ git commit -m "Add a test file"
 [my-test e728269] Add a test file
  1 file changed, 1 insertion(+)
  create mode 100644 test.txt
@@ -617,7 +631,7 @@ PS D:\test\repo> git commit -m "Add a test file"
 Now `git log --oneline` should look like this:
 
 ```
-PS D:\test\repo> git log --oneline
+$ git log --oneline
 e728269 Add a test file
 25632ea Modify a file
 3dc35b9 My first commit
@@ -626,9 +640,9 @@ e728269 Add a test file
 Switch back to the "master" branch and let show you the log:
 
 ```
-PS D:\test\repo> git checkout master
+$ git checkout master
 Switched to branch 'master'
-PS D:\test\repo> git log --oneline
+$ git log --oneline
 25632ea Modify a file
 3dc35b9 My first commit
 ```
@@ -638,8 +652,8 @@ You see that the log line `e728269 Add a test file` is missing in the "master" b
 Now create another file, add it to the repository and commit:
 
 ```
-PS D:\test\repo> git add slave.txt
-PS D:\test\repo> git commit -m "Add slave to master"
+$ git add slave.txt
+$ git commit -m "Add slave to master"
 [master 9589a2d] Add slave to master
  1 file changed, 1 insertion(+)
  create mode 100644 slave.txt
@@ -648,7 +662,7 @@ PS D:\test\repo> git commit -m "Add slave to master"
 The current repository log:
 
 ```
-PS D:\test\repo> git log --oneline
+$ git log --oneline
 9589a2d Add slave to master
 25632ea Modify a file
 3dc35b9 My first commit
@@ -728,9 +742,11 @@ In this figure, the branch "topic" has only some commits that are not contained 
 
 ![Linear history after fast-forward merge](images/linear-history-merge.svg)
 
+Note: with the flag `--ff-only` you can allow fast-forward merging only. If it is not possible to do a fast-forward merge, Git will abort with an error message.
+
 ## Recursive
 
-If you want to merge branches that have both additional commits since the last common ancestor, you have to use the recursive merge strategy.
+If you want to merge branches that have both additional commits since the last common ancestor, Git has to use the recursive merge strategy.
 
 Assume this commit history:
 
@@ -739,6 +755,8 @@ Assume this commit history:
 There is a commit on the "master" branch since the "topic" branch was created. To merge these branches, Git has to put the changes of them to a new commit:
 
 ![Merged diverged history](images/diverged-history-merge.svg)
+
+Note: with the flag `--no-ff` you can force Git to do a recursive merge, even if a fast-forward merge is possible. Some teams use this to preserve topic branches and the changes that belong to them.
 
 ## Rebase
 
@@ -749,7 +767,7 @@ Git allows you to change the commit history. All imaginable thinks are possible,
 - Merging commits to one
 - Making a diverged history linear
 
-These operations are called "rebase" operations, because most of them are done with the command `git rebase`. As in real life, changing the history is not trivial. All references must be rewritten to make the changed history the true one. As long as the history is only known to one person (meaning the commits are not published yet), it is not much a problem. But after publishing, all people that work with the rebased repository have to reproduce your rebase too.
+These operations are called "rebase" operations, because most of them are done with the command `git rebase`. As in real life, changing the history is not trivial. All references must be rewritten to make the changed history to be considered the true one. As long as the history is only known to one person (meaning the commits are not published yet), it is not much a problem. But after publishing, all people that work with the rebased repository have to reproduce your rebase too.
 
 A rebase is performed by creating new commits that are based on certain old commits. Because every rebase changes some data of commits to rebase, the new commits get new hash sums. Branch pointers have to be updated too - otherwise the old commits that were rebased will stay visible as long as they are reachable by a branch pointer.
 
@@ -757,7 +775,7 @@ A diverged history that was rebased to linear can look like following:
 
 ![Diverged history rebased](images/diverged-history-rebase.svg)
 
-There is a "topic" branch those original parent commit is `B` (a SHA-1 hash in a real repository) and was rebased that `E` is now the parent commit. The figure implies that the SHA-1 hash is recalculated with changed data (`C'` instead of `C`).
+There is a "topic" branch those original parent commit is `B` (a SHA1 hash in a real repository) and was rebased that `E` is now the parent commit. The figure implies that the SHA1 hash is recalculated with changed data (`C'` instead of `C`).
 
 Note: some operations are not done with `git rebase`. One example is `git commit --amend` that allows you to correct the last commit. Another example is `git filter-branch` that lets you rewrite the history of all reachable commits with one command or script. Both Git commands will be examined in the examples below.
 
@@ -768,29 +786,36 @@ Note: some operations are not done with `git rebase`. One example is `git commit
 First, make a new branch and switch to it:
 
 ```
-PS D:\test\repo> git checkout -b to-be-fast-forwarded
+$ git checkout -b to-be-fast-forwarded
 Switched to a new branch 'to-be-fast-forwarded'
 ```
 
 Change a file and commit the change (e.g. an additional text line in "hello.txt"):
 
 ```
-PS D:\test\repo> git commit -am "Improve greeting"
+$ git commit -am "Improve greeting"
 [to-be-fast-forwarded 4ebf636] Improve greeting
  1 file changed, 1 insertion(+)
+```
+
+Note the additional flag `-a` in this example. The above line is abbreviation of these two commands:
+
+```
+$ git add .
+$ git commit -m "Improve greeting"
 ```
 
 To merge "to-be-fast-forwarded" into "master", you have to checkout "master" (meaning "master" has to be made the current branch):
 
 ```
-PS D:\test\repo> git checkout master
+$ git checkout master
 Switched to branch 'master'
 ```
 
 Then merge:
 
 ```
-PS D:\test\repo> git merge to-be-fast-forwarded
+$ git merge to-be-fast-forwarded
 Updating 9589a2d..4ebf636
 Fast-forward
  hello.txt | 1 +
@@ -806,7 +831,7 @@ If you still reproduce the examples with the repository of the beginning (recomm
 Now merge:
 
 ```
-PS D:\test\repo> git merge my-test
+$ git merge my-test
 Merge made by the 'recursive' strategy.
  test.txt | 1 +
  1 file changed, 1 insertion(+)
@@ -816,7 +841,7 @@ Merge made by the 'recursive' strategy.
 Git said that it made a "recursive" merge. Typing `git log --oneline --graph` will give you this output:
 
 ```
-PS D:\test\repo> git log --oneline --graph
+$ git log --oneline --graph
 *   2e32353 Merge branch 'my-test'
 |\
 | * e728269 Add a test file
@@ -827,7 +852,7 @@ PS D:\test\repo> git log --oneline --graph
 * 3dc35b9 My first commit
 ```
 
-As you see in the output above, the commit history consists now of two parallel lines that have their root at commit "25632ea" and are merged in a so called "merge commit". This commit was created automatically by Git. If you prefer to commit manually after merge (e.g. to put your own commit message), you have to type `git merge --no-commit branch-name` instead.
+As you see in the output above, the commit history consists now of two parallel lines that have their root at commit "25632ea" and are merged in a so called "merge commit". This commit was created automatically by Git. If you prefer to commit manually after merge (e.g. to put your own commit message), you have to type `git merge --no-commit {branch name}` instead.
 
 ### Rebase examples
 
@@ -870,9 +895,9 @@ Actually, a kind of script will be executed by Git in this case. The lines that 
 In this example there is not more to do as closing the text editor containing the default text. Git will then perform the rebase. A `git log --oneline --graph --all` will look almost as intended:
 
 ```
-D:\test\repo [master]> git rebase -i HEAD~2
+$ git rebase -i HEAD~2
 Successfully rebased and updated refs/heads/master.
-D:\test\repo [master]> git log --oneline --graph --all
+$ git log --oneline --graph --all
 * 418ac30 Add a test file
 * 3efacf6 Improve greeting
 * fcfa7b8 Add slave to master
@@ -885,9 +910,9 @@ D:\test\repo [master]> git log --oneline --graph --all
 But the branch "my-test" is still in the repository and we have now two commits with the same message "Add a test file". To have a clean, linear commit history, we just have to delete the "my-test" branch:
 
 ```
-D:\test\repo [master]> git branch -D my-test
+$ git branch -D my-test
 Deleted branch my-test (was 6e6ad01).
-D:\test\repo [master]> git log --oneline --graph --all
+$ git log --oneline --graph --all
 * 418ac30 Add a test file
 * 3efacf6 Improve greeting
 * fcfa7b8 Add slave to master
@@ -895,7 +920,7 @@ D:\test\repo [master]> git log --oneline --graph --all
 * 0c55337 My first commit
 ```
 
-Note, that `-D` instead of `-d` was used, because the commits of that branch will be not reachable by any branch and their changes would be lost in normal circumstances.
+Note, that `-D` instead of `-d` was used. Git has to be forced to delete the branch because the commits of that branch will be not reachable by any branch and their changes would be lost in normal circumstances.
 
 #### Correct last commit
 
@@ -910,8 +935,8 @@ Sum errorz here
 Commit:
 
 ```
-D:\test\repo [master +1 ~0 -0 !]> git add error.txt
-D:\test\repo [master +1 ~0 -0 ~]> git commit -m "Introduse errorz"
+$ git add error.txt
+$ git commit -m "Introduse errorz"
 [master e115c2e] Introduse errorz
  1 file changed, 1 insertion(+)
  create mode 100644 error.txt
@@ -934,12 +959,12 @@ $ git add error.txt
 And recommit (with no typo in the message either):
 
 ```
-D:\test\repo [master +0 ~1 -0 ~]> git commit --amend -m "Introduce errors"
+$ git commit --amend -m "Introduce errors"
 [master 979003e] Introduce errors
  Date: Fri Nov 3 15:52:26 2017 +0100
  1 file changed, 1 insertion(+)
  create mode 100644 error.txt
-D:\test\repo [master]> git log --oneline --graph --all
+$ git log --oneline --graph --all
 * 979003e Introduce errors
 * 7e8d078 Add a test file
 * 4ebf636 Improve greeting
@@ -955,10 +980,10 @@ As you see in the output of `git log`, the commit history now looks as the last 
 For this example, it seems appropriate to create a Visual Studio project in a new repository. Assume a console application named "hello". Initialize the repository and make your first commit right after creating the Visual Studio solution:
 
 ```
-D:\test\hello> git init
+$ git init
 Initialized empty Git repository in D:/test/hello/.git/
-D:\test\hello [master +3 ~0 -0 !]> git add .
-D:\test\hello [master +15 ~0 -0 ~]> git commit -m Initialize
+$ git add .
+$ git commit -m Initialize
 [master (root-commit) 590fa0c] Initialize
  15 files changed, 163 insertions(+)
  create mode 100644 .vs/hello/v14/.suo
@@ -998,8 +1023,8 @@ namespace hello
 Now build the solution (Ctrl+Shift+B in Visual Studio), add some additional yet untracked files and commit:
 
 ```
-D:\test\hello [master +5 ~2 -0 !]> git add .
-D:\test\hello [master +5 ~2 -0 ~]> git commit -m "First approach to solve this complex problem"
+$ git add .
+$ git commit -m "First approach to solve this complex problem"
 [master 02f7599] First approach to solve this complex problem
  7 files changed, 6 insertions(+), 4 deletions(-)
  create mode 100644 hello/bin/Debug/hello.exe
@@ -1012,7 +1037,7 @@ D:\test\hello [master +5 ~2 -0 ~]> git commit -m "First approach to solve this c
 Now we have two commits that both contain a bunch of generated files that should never be committed. To delete these files:
 
 ```
-D:\test\hello [master]> git filter-branch --index-filter 'git rm --cached --ignore-unmatch hello/bin/* hello/obj/* .vs/*' HEAD
+$ git filter-branch --index-filter 'git rm --cached --ignore-unmatch hello/bin/* hello/obj/* .vs/*' HEAD
 Rewrite 590fa0c172c1abb942f2a65b70650a19b439c2ec (1/2) (0 seconds passed, remaining 0 predicted)    rm '.vs/hello/v14/.suo'
 rm 'hello/bin/Debug/hello.exe.config'
 rm 'hello/bin/Debug/hello.vshost.exe'
@@ -1047,7 +1072,7 @@ The above command consists of two nested parts:
 1. `git filter-branch --index-filter '<COMMAND>' HEAD`
 2. "&lt;COMMAND&gt;" = `git rm --cached --ignore-unmatch hello/bin/* hello/obj/* .vs/*`
 
-The first part of the command says Git that the complete commit history shall be rewritten. The second part will be executed with every commit - in this example certain files shall be deleted.
+The first part of the command says Git that all commits reachable by the HEAD pointer shall be rewritten. The second part will be executed with every commit - in this example certain files shall be deleted.
 
 When you type `git log --patch` you will see that the files are really not in the history anymore:
 
@@ -1271,17 +1296,19 @@ obj/
 .vs/
 ```
 
+In this example, the directories for the Visual Studio build system is ignored and the directory for the Visual Studio user settings.
+
 Add ".gitignore" to repository and commit:
 
 ```
-D:\test\hello [master +1 ~0 -0 !]> git add .gitignore
-D:\test\hello [master +1 ~0 -0 ~]> git commit -m "Ignore generated files"
+$ git add .gitignore
+$ git commit -m "Ignore generated files"
 [master 4013b9a] Ignore generated files
  1 file changed, 3 insertions(+)
  create mode 100644 .gitignore
 ```
 
-If you now open the Visual Studio solution file, you will see that Git will not discover any files anymore that are not supposed to be committed.
+If you now open the Visual Studio solution file and build it, you will see that Git will not discover any files anymore that are not supposed to be committed.
 
 Note for the practice that the ".gitignore" file in this example is very rudimentary and a real project will probably have several other files that shall be ignored.
 
@@ -1304,7 +1331,7 @@ If you want to `git filter-branch` a repository after it was published already (
 
 Make sure that you have a backup of your repository before attempting such operations.
 
-As you see in the example, `git filter-branch` can be quiet complicated. Unfortunately Git Extensions seems not to offer Filter-Branch operations but there is another tool that promises to make Filter-Branch operations much easier named [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) (not tested by the author). You should try it especially if you have multiple repositories containing files that should never be committed.
+As you see in the example, `git filter-branch` can be quiet complicated. Unfortunately Git Extensions seems not to offer Filter-Branch operations but there is another tool that promises to make Filter-Branch operations much easier named [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) (not tried by the author). You should try it especially if you have multiple repositories containing files that should never be committed.
 
 ### With Git Extensions
 
@@ -1358,7 +1385,7 @@ Type in the field "Rebase on" the text `HEAD~2` and check the checkbox "Interact
 
 ![Rebase in Git Extensions, step 3](images/gitext-rebase3.png)
 
-This looks the same as in the corresponding command line example. You can just close the editor. The history should now look like this:
+This looks the same as in the corresponding CLI example. You can just close the editor. The history should now look like this:
 
 ![Rebase in Git Extensions, step 4](images/gitext-rebase4.png)
 
@@ -1428,14 +1455,14 @@ Nice to meet you
 Checkout a new branch:
 
 ```
-D:\test\repo [master]> git checkout -b to-be-conflicted
+$ git checkout -b to-be-conflicted
 Switched to a new branch 'to-be-conflicted'
 ```
 
 Modify the file "hello.txt", e.g. by replacing "Hello" with "Hallo". `git status` should look like this:
 
 ```
-D:\test\repo [to-be-conflicted +0 ~1 -0 !]> git status
+$ git status
 On branch to-be-conflicted
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
@@ -1449,7 +1476,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
 And commit:
 
 ```
-D:\test\repo [to-be-conflicted +0 ~1 -0 !]> git commit -am "Say hallo instead of hello"
+$ git commit -am "Say hallo instead of hello"
 [to-be-conflicted 2459d02] Say hallo instead of hello
  1 file changed, 1 insertion(+), 1 deletion(-)
 ```
@@ -1457,11 +1484,11 @@ D:\test\repo [to-be-conflicted +0 ~1 -0 !]> git commit -am "Say hallo instead of
 Checkout the "master" branch and edit "hello.txt again at the same place, e.g. by replacing "Hello" with "Hola":
 
 ```
-D:\test\repo [to-be-conflicted]> git checkout master
+$ git checkout master
 
 # ... Some edits
 
-D:\test\repo [master +0 ~1 -0 !]> git commit -am "Say hola instead of hello"
+$ git commit -am "Say hola instead of hello"
 [master 7861168] Say hola instead of hello
  1 file changed, 1 insertion(+), 1 deletion(-)
 ```
@@ -1469,7 +1496,7 @@ D:\test\repo [master +0 ~1 -0 !]> git commit -am "Say hola instead of hello"
 A merge now will lead to a conflict:
 
 ```
-D:\test\repo [master]> git merge to-be-conflicted
+$ git merge to-be-conflicted
 Auto-merging hello.txt
 CONFLICT (content): Merge conflict in hello.txt
 Automatic merge failed; fix conflicts and then commit the result.
@@ -1478,7 +1505,7 @@ Automatic merge failed; fix conflicts and then commit the result.
 Typing `git status`:
 
 ```
-D:\test\repo [master +0 ~0 -0 !1 | +0 ~0 -0 !1 !]> git status
+$ git status
 On branch master
 You have unmerged paths.
   (fix conflicts and run "git commit")
@@ -1515,8 +1542,8 @@ Nice to meet you
 Now mark the file as solved:
 
 ```
-D:\test\repo [master +0 ~0 -0 !1 | +0 ~0 -0 !1 !]> git add hello.txt
-D:\test\repo [master +0 ~1 -0 ~]> git status
+$ git add hello.txt
+$ git status
 On branch master
 All conflicts fixed but you are still merging.
   (use "git commit" to conclude merge)
@@ -1530,9 +1557,9 @@ Changes to be committed:
 If you now type `git commit` only, a text editor, containing the standard merge commit message will appear. After closing the editor, the commit will be performed and the two conflicting branches are merged successfully:
 
 ```
-D:\test\repo [master +0 ~1 -0 ~]> git commit
+$ git commit
 [master 669d43d] Merge branch 'to-be-conflicted'
-D:\test\repo [master]> git log --oneline --graph
+$ git log --oneline --graph
 *   669d43d Merge branch 'to-be-conflicted'
 |\
 | * 1c14344 Say hallo instead of hello
@@ -1625,11 +1652,11 @@ After successfully merging and committing, your commit history should look like 
 
 # Working with remote repositories
 
-To work with other people on the same project you need repository that is reachable by all participants - a remote repository. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote one does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some HTTP server, a network file share or even on your local machine.
+To work with other people on the same project you need a repository that is reachable by all participants - a remote repository. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote repository does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some HTTP server, a network file share or even on your local machine.
 
-To publish your work on a remote repository, it must be registered in your personal repository. It is possible to have multiple remote repositories registered. Each remote repository has an alias name e.g. "origin". If you clone a personal repository from a remote one, the remote is registered automatically as "origin". The name "origin" is just the default one of the remote repository where you cloned from. Besides of this the name, "origin" has no special meaning and you are free to rename it to your preferences (though most people do not mind the default).
+To publish your work on a remote repository, it must be registered in your personal repository. It is possible to have multiple remote repositories registered. Each remote repository has an alias name e.g. "origin". If you clone a personal repository from a remote one, the remote is registered automatically as "origin". The name "origin" is just the default one of the remote repository where you cloned from. Besides of this, the name "origin" has no special meaning and you are free to rename it to your preferences (though most people do not mind to change the default).
 
-Refer book "Pro Git", [chapter 4.1 Git on the Server - The Protocols](https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols) (and following chapters) for possibilities to setup a central repository.
+Refer book "Pro Git", [chapter 4.1 Git on the Server - The Protocols](https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols) (and following chapters) for several possibilities to setup a remote repository.
 
 ## Basic commands
 
@@ -1637,9 +1664,9 @@ Refer book "Pro Git", [chapter 4.1 Git on the Server - The Protocols](https://gi
 
 Initializes a new "remote" repository in the current directory.
 
-### `git clone {URL} {directory}
+### `git clone {URL} {directory}`
 
-Creates a new directory `{directory}` in the current directory and clones there the remote repository under `{URL}`. The remote repository gets registered with name "origin" automatically.
+Creates a new directory `{directory}` in the current directory and clones the remote repository under `{URL}`. The remote repository gets registered with name "origin" automatically.
 
 ### `git push {remote name} {branch name}`
 
@@ -1660,12 +1687,12 @@ If you want that your local branch is not merged with the last state of the remo
 Make a new repository named "personal1":
 
 ```
-D:\test> mkdir personal1
+$ mkdir personal1
 
 # ...
 
-D:\test> cd personal1
-D:\test\personal1> git init
+$ cd personal1
+$ git init
 Initialized empty Git repository in D:/test/personal1/.git/
 ```
 
@@ -1678,8 +1705,8 @@ Hello, world!
 Commit:
 
 ```
-D:\test\personal1 [master]> git add hello.txt
-D:\test\personal1 [master +1 ~0 -0 ~]> git commit -m "Initialize"
+$ git add hello.txt
+$ git commit -m "Initialize"
 [master (root-commit) 9e347be] Initialize
  1 file changed, 1 insertion(+)
  create mode 100644 hello.txt
@@ -1688,12 +1715,12 @@ D:\test\personal1 [master +1 ~0 -0 ~]> git commit -m "Initialize"
 Now create a "remote" repository on your local file system (there is no difference to a remote repository that lies somewhere in the network that matters for this example):
 
 ```
-D:\test> mkdir central.git
+$ mkdir central.git
 
 # ...
 
-D:\test> cd central.git
-D:\test\central.git> git init --bare
+$ cd central.git
+$ git init --bare
 Initialized empty Git repository in D:/test/central.git/
 ```
 
@@ -1702,8 +1729,8 @@ Note that the directory containing the remote repository ends with ".git". It is
 Register the fresh remote repository in the personal repository:
 
 ```
-D:\test\central [BARE:master]> cd ..\personal1
-D:\test\personal1 [master]> git remote add origin D:/test/central/
+$ cd ..\personal1
+$ git remote add origin D:/test/central/
 ```
 
 Note the slashes "`/` " instead of backslashes "`\`" in the windows path to the remote repository. Slashes should be preferred because it can be problematic using backslashes while slashes in remote URLs do not make any problems in any situation.
@@ -1711,7 +1738,7 @@ Note the slashes "`/` " instead of backslashes "`\`" in the windows path to the 
 Now the data in the personal repository can be "pushed":
 
 ```
-D:\test\personal1 [master]> git push origin master
+$ git push origin master
 Counting objects: 3, done.
 Writing objects: 100% (3/3), 238 bytes | 0 bytes/s, done.
 Total 3 (delta 0), reused 0 (delta 0)
@@ -1722,14 +1749,14 @@ To D:/test/central/
 A `git log` in the central repository will now look exactly as `git log in your personal one:
 
 ```
-D:\test\personal1 [master]> git log
+$ git log
 commit 9e347be6c7d02c7790d98a66cdce45941e841eb4
 Author: Christian Dreier <christian.dreier@csa-germany.de>
 Date:   Mon Nov 6 11:19:52 2017 +0100
 
     Initialize
-D:\test\personal1 [master]> cd ..\central
-D:\test\central [BARE:master]> git log
+$ cd ..\central
+$ git log
 commit 9e347be6c7d02c7790d98a66cdce45941e841eb4
 Author: Christian Dreier <christian.dreier@csa-germany.de>
 Date:   Mon Nov 6 11:19:52 2017 +0100
@@ -1748,7 +1775,7 @@ can be abbreviated by the single line `git clone --bare .\personal1 central-repo
 Now clone a second personal repository out of the remote one:
 
 ```
-D:\test> git clone central.git personal2
+$ git clone central.git personal2
 Cloning into 'personal2'...
 done.
 ```
@@ -1756,8 +1783,8 @@ done.
 You will see that the cloned personal repository has registered the remote repository already and that its state is identical to the remote repository and the other personal one:
 
 ```
-D:\test> cd personal2
-D:\test\personal2 [master =]> git remote show origin
+$ cd personal2
+$ git remote show origin
 * remote origin
   Fetch URL: D:/test/central.git
   Push  URL: D:/test/central.git
@@ -1768,7 +1795,7 @@ D:\test\personal2 [master =]> git remote show origin
     master merges with remote master
   Local ref configured for 'git push':
     master pushes to master (up to date)
-D:\test\personal2 [master =]> git log
+$ git log
 commit 9e347be6c7d02c7790d98a66cdce45941e841eb4
 Author: Christian Dreier <christian.dreier@csa-germany.de>
 Date:   Mon Nov 6 11:19:52 2017 +0100
@@ -1780,21 +1807,21 @@ Date:   Mon Nov 6 11:19:52 2017 +0100
 
 ## Branching
 
-In traditional centralized VCSs is it usual to have a single line of history where all participants commit their changes on. Quite often, these commits introduce bugs and build errors. Occasionally a branch is created to stabilize the software for a release. This happens quiet seldom - 1 to 2 times a year - because creating a branch is very heavyweight traditionally (though modern iterations of certain centralized VCSs are optimized, e.g. Subversion) and can make additional problems depending on the project.
+In traditional centralized VCSs it is usual to have a single line of history where all participants commit their changes on. Quite often, these commits introduce bugs and build errors. Occasionally a branch is created to stabilize the software for a release. This happens quiet seldom - 1 to 2 times a year - because creating a branch is very heavyweight traditionally (though modern iterations of certain centralized VCSs are optimized, e.g. Subversion) and can make additional problems depending on the project.
 
-In contrast, branching in Git is very lightweight and merging is usually not much a problem too. Because of this, there evolved many workflows that take advantage of branching. It can be supposed that each team has not only its own individual workflow, they could even be differences between projects of the same team. The complexity of most workflows lingers between 2 extremes:
+In contrast, branching in Git is very lightweight and merging is usually not much a problem too. Because of this, there evolved many workflows that take advantage of branching. It can be supposed that each team has not only its own individual workflow, they could even be different between projects of the same team. The complexity of most workflows lingers between 2 extremes:
 
 - "Master only workflow"
 - [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) (though more complexity is always possible)
 
-Most workflows consist of one or more eternal living branches differentiated by their stability and temporary feature and bugfix branches. It seems most appropriate to decide for each project individually which workflow will be used. Refer to [an overview of different workflows](http://blog.endpoint.com/2014/05/git-workflows-that-work.html) for more information.
+Most workflows consist of one or more eternal living branches differentiated by their stability. Additionally there are temporary feature and bugfix branches. It seems most appropriate to decide for each project individually which workflow will be used. Refer to [an overview of different workflows](http://blog.endpoint.com/2014/05/git-workflows-that-work.html) for more information.
 
 
 ### "Master only workflow"
 
 That is the most simple workflow and can be appropriate for individuals or very small teams if either:
 
-- If breaking changes can be accepted
+- Breaking changes can be accepted
 - There is another mechanism to ensure that the customers do not get faulty versions, e.g. a QA team tests the changes that are pushed by the developers and ensure that the customers get only tested and fixed versions.
 
 ### [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/)
@@ -1803,7 +1830,7 @@ This workflow consists of:
 
 - An eternal "master" or "production" branch that contains the software versions that the customers get.
 - An eternal "develop" branch that contains the current state of development.
-- Temporary feature branches (one for each feature) - they get merged and then deleted after the feature is completed.
+- Temporary feature branches (one for each feature) - they get merged and then deleted after the feature is completed. Usually the merges are always recursive merges to preserve that certain changes belonged to a certain branch in the past.
 - A temporary release branch. A release branch is branched off of the development branch right before a release and exists to make sure that the feature set to deliver is stable actually. Bugfixes done there are merged back to "develop". After the state of the release branch can be considered stable, it gets merged with "master" and then deleted.
 - If necessary, a temporary "hotfix" branch to fix bugs in releases. After the hotfix is implemented, the corresponding branch gets merged with "master" and "develop" and then deleted.
 
@@ -1811,7 +1838,7 @@ Refer [the blog post on GitFlow](http://nvie.com/posts/a-successful-git-branchin
 
 ### Other workflows
 
-While the "Master only workflow" can be considered too simple, [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) is perceived as too complex by many people, e.g. [the GitHub team](http://scottchacon.com/2011/08/31/github-flow.html). Generally a workflow should not be too complicated but should also support you ensuring the required quality of the software.
+While the "Master only workflow" can be considered too simple, [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) is perceived as too complex by many people, e.g. [the GitHub team](http://scottchacon.com/2011/08/31/github-flow.html). Generally a workflow should not be too complicated but should also support you to ensure the required quality of the software.
 
 ## Remote repositories in teams
 
@@ -1837,21 +1864,33 @@ Every developer has additionally to his private repository a public one. The ble
 
 ![Benevolent Dictator model](images/benevolent-dictator.svg)
 
-A model that seems appropriate for very bigger teams (it used by the Linux kernel developers - Linus Torvalds is the benevolent dictator). Like in the integration manager model, every developer has his own public repository additionally to his private one and the blessed public one. Pull requests are not sent to the "dictator" but to his "lieutenants". They filter the pull requests that do not fit to the requirements and rules and are able to pass pull requests from multiple developers as one pull request. It is possible that the lieutenants have sub-lieutenants and they could have sub-sub-lieutenants and so on.
+A model that seems appropriate for very big teams (it used by the Linux kernel developers - Linus Torvalds is the benevolent dictator). Like in the integration manager model, every developer has his own public repository additionally to his private one and the blessed public one. Pull requests are not sent to the "dictator" but to his "lieutenants". They filter the pull requests that do not fit to the requirements and rules and are able to pass pull requests from multiple developers as one pull request. It is possible that the lieutenants have sub-lieutenants and they could have sub-sub-lieutenants and so on.
 
 # Technical background
 
 A personal Git repository is nothing more then a directory that contains a subdirectory named ".git" and content of the working copy. This subdirectory contains all the data of the repository. If you delete this ".git" subdirectory, your whole repository is gone with that.
 
-One could imagine that Git (or every VCS) stores the revision history this way:
+## Plumbing and porcelain
+
+While Git was created, the data model was created first and after that the tooling to manipulate this data model was created. In fact, the very first commits of Git itself were handcrafted by its creator. Because of this history and preferences of the creator, Git has many very low level commands to manipulate the data model. E.g. `git update-index` can be understood as a low level version of `git add`. They can be used to mess up a repository, repair a messed up repository or just to look at internals of a repository.
+
+The low level commands are called "plumbing commands" while the high level commands that are used most time (and in the examples of this document) are called "porcelain". It can be said that the plumbing commands came first to implement the tool and that the porcelain came later to make the tool user friendly.
+
+## Data storage and object concept
+
+### Revision history
+
+One could imagine that Git (or every VCS) stores only differences in the revision history:
 
 ![Delta storage in VCS](images/delta-storage.svg)
 
-The whole content of a file is stored only at the beginning, when the file is added to the VCS. After that, only differences are stored. To get the file content of a specific revision, all patches between file creation and the specified revision have to applied. This algorithm is much too slow! Instead, Git sores always the whole content of changed files and generate differences on demand:
+The whole content of a file is stored only at the beginning, when the file is added to the VCS. After that, only changes to them are stored. To get the file content of a specific revision, all patches between file creation and the specified revision have to applied. This algorithm is much too slow! Instead, Git stores always the whole content of changed files and generate differences on demand:
 
 ![Snapshot storage in VCS](images/snapshot-storage.svg)
 
-If a file is not changed in a particular revision, the revision contains only a pointer to the file in an earlier revision. Git goes one step further and addresses files only by their content - so any two (or more) files that have the same content are stored only once in the repository - no matter whether redundancy is in the working copy, through revisions or both.
+If a file is not changed in a particular revision, the revision contains only a pointer to the file that was added in an earlier revision. Git goes one step further and addresses files only by their content - so any two (or more) files that have the same content are stored only once in the repository.
+
+### Objects
 
 All the repository data consists of "objects" and pointers. An object is just a bunch of compressed binary data addressed by the SHA1 hash sum of its compressed content. There are four different types of objects (as mentioned in the [Git User Manual](https://www.kernel.org/pub/software/scm/git/docs/user-manual.html#the-object-database)):
 
@@ -1860,7 +1899,7 @@ All the repository data consists of "objects" and pointers. An object is just a 
 - Commit objects
 - Tag objects
 
-## Commit objects
+#### Commit objects
 
 Typing `git show -s --pretty=raw` will show you all the information that is stored to the last commit:
 
@@ -1878,23 +1917,23 @@ committer Christian Dreier <christian.dreier@csa-germany.de> 1509721335 +0100
 As you see in this output, a commit consists of these data fields:
 
 - Tree: Every commit has a reference to a "tree" object. A tree object represents the contents of a directory - in this case the working copy at commit time. More details described below.
-- Parent: The "parent" commit object.
-- Author, committer: The one who is responsible for the change. It is possible the author and committer are different, e.g. if a patch was sent by e-mail by one to another person and the other person committed that patch.
+- Parent: The "parent" commit object. If the commit is a merge commit, there will be multiple "parent" entries each in its own line. If the commit has no parent (probably the first commit in the history), there will be no "parent" entry.
+- Author, committer: The person who is responsible for the change. It is possible that the author and committer are different, e.g. if a patch was sent by e-mail by one to another person and the other person committed that patch.
 - Message: The commit message.
 
-The whole revision history consists of commits that are linked to a [directed acyclic graph](https://www.kernel.org/pub/software/scm/git/docs/user-manual.html#def_DAG). Every commit references the parent commit but no child commits. The first commit of the repository has no parent - the parent hash sum there consists of zeros.
+The whole revision history consists of commits that are linked to a [directed acyclic graph](https://www.kernel.org/pub/software/scm/git/docs/user-manual.html#def_DAG). Every commit references the parent commit but no child commits. The first commit of the repository has no parent - the parent hash sum of the first commit consists of zeros.
 
 ![Commits linked to represent history](images/commit-history.svg)
 
 The hash sum of the commit is calculated by all information mentioned above. Because the parent commit will be considered for the hash sum too, you cannot change any commit without changing the hash sums of all their child commits.
 
-## Tree objects
+#### Tree objects
 
-A tree object represents the contents of a directory. It contains a mapping between object hashes and their corresponding file names. Additionally every entry contains the object type and the file mode in Unix notation.
+A tree object represents the contents of a directory. It contains a mapping between object hashes and their corresponding file names. Additionally every entry contains the object type ("blob" or "tree") and the file mode in Unix notation (though Git file modes are simplified compared to Unix file modes).
 
-A blob object represents the contents of a file. A tree object represents the contents of a subdirectory.
+A containing blob object represents the contents of a file. A containing tree object represents the contents of a subdirectory.
 
-`git ls-tree {SHA1 hash of a tree object}` will show you its content:
+An example of `git ls-tree {SHA1 hash of a tree object}`:
 
 ```
 $ git ls-tree a59deb234d64022d6c0819af7713cff6dc23971d
@@ -1904,7 +1943,7 @@ $ git ls-tree a59deb234d64022d6c0819af7713cff6dc23971d
 100644 blob e8551ad3ddb4bb1e3e913a25594a98a83f4effc4    test.txt
 ```
 
-## Blob objects
+#### Blob objects
 
 Just a binary blob of data, originated from a file and named after the SHA1 hash of its compressed content (plus a header inserted by Git - because of this, the SHA1 of the content is not identical to the SHA1 generated by Git). It does not refer to anything else in the repository.
 
@@ -1916,19 +1955,47 @@ Hello, people
 Nice to see you!
 ```
 
-## Tag objects
+#### Tag objects
 
-...
+An object that points to another object. Additionally a tag contains the type of the pointed object, the person who created the tag, a tag message and optionally a GPG signature (GPG must be working on your system). It is used usually to mark specific commits that have to be trusted, e.g. commits that are used as release versions.
 
-## Pointers everywhere!
+### Pointers, pointers, pointers
+
+Theoretically the objects and their SHA1 hashes are enough to work with a repository. But it would be cumbersome to operate with SHA1 hashes the whole time. Because of this, every repository contains a bunch of pointers and many commands allow it to operate on these pointers. The porcelain commands manage the pointers usually in a way that you do not need to care too much about them. But basic knowledge is necessary anyway.
+
+![Commits with pointers](images/branch-and-history.svg)
+
+#### HEAD pointer
+
+The HEAD pointer points to the "current" object of your repository - either indirectly as usual or directly. The working copy will be compared always with the state persisted in the "current" object. The HEAD pointer is manipulated with the `git checkout` command.
+
+Usually the HEAD pointer points through a branch pointer to the last commit of a branch. But you can also "checkout" a tag or a commit directly. If you do this, you get the message that you are now in a "detached HEAD" state. You are not in any branch. If you make a commit, it will not be part of any branch but the (detached) HEAD pointer will update to the new commit. If you checkout anything else, you better remember the SHA1 of the last branchless commit. Take care that the branchless commits may be deleted some time afterwards by cleaning actions performed by Git or additional tools.
+
+As mentioned in the message of Git, you can create a branch at any time - just type `git checkout -b {new-branch-name}` at any time. A new branch pointer will be created that points to the commit where the HEAD pointer pointed the last time. The HEAD pointer will point to the created branch.
+
+#### Branch pointers
+
+A branch pointer points always to a commit. This commit is considered the last commit of this branch. If you make a commit while the HEAD pointer points to branch, this branch pointer will update to this new commit.
+
+The repository can contain as many branch pointers as desired. Deleting a branch pointer is no problem at all as long as the commit, where the deleted branch pointer pointed to, is reachable by any other branch pointer. If the commit is not reachable by any other branch pointer, you have to force the deletion because this commit and its data could be lost potentially - the commit can be reached only by its SHA1 hash and cleaned away one time.
+
+#### Tags
+
+Not a pointer really as mentioned above but with some properties of a pointer. It points always to an object that is considered trustworthy by the tagger. If you checkout a tag (update the HEAD pointer to point to a tag), the HEAD pointer will be in a detached state like after a checkout of a commit directly. Because if you make a commit while a tag is checked out, the commit will not belong to any branch and the HEAD pointer will be updated to point to the new commit directly.
 
 # Additional tools
 
 ## [Git Extensions](http://gitextensions.github.io/) (of course)
 
+A Git GUI that is used by the author for day to day work and mentioned in the examples of this document. It supports a big part of the feature set of Git. But sometimes the performance at big repository is not good.
+
 ## [posh-git](https://github.com/dahlbyk/posh-git)
 
+A PowerShell extension. It extends PowerShell to show the current Git status in the prompt and adds some auto completion for Git commands (though there are many commands where the auto completion does not work).
+
 ## [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/)
+
+A tool that promises to make it easy to clean the commit history of files that should not be committed. Not tried by the author.
 
 # Sources
 
