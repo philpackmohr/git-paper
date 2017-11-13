@@ -8,20 +8,21 @@ Commit often, perfect later, publish once
 
 Classical version control systems have one central repository that is accessed by all participants.
 
-![Classical VCS](images/centralized-vcs.svg)
+![Central VCS](images/centralized-vcs.svg)
 
 Each participant checks out a working copy from the central repository. Changes are committed to the central repository directly.
 
 With Git every participant has its own full repository with all version information on his own machine.
 
-![Classical VCS](images/distributed-vcs.svg)
+![Distributed VCS](images/distributed-vcs.svg)
 
 This causes some advantages:
 
 - There is no need to be connected to some central repository while working
-- A participant can make commits, branches and can even change the version history on his local machine before he publishes his changes
+- A participant can make commits, branches and can even change the version history on his local machine without disturbing anyone before he publishes his changes
 - If a centralized VC repository gets lost you have better a backup. With Git and other decentralized VCSs every participant has a backup
-- ...
+- There is no need to have any server instance running just to track a revision history
+- Performance is much better because most operations do not depend on a network connection
 
 ## Working with Git
 
