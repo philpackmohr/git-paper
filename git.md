@@ -1653,7 +1653,7 @@ After successfully merging and committing, your commit history should look like 
 
 # Working with remote repositories
 
-To work with other people on the same project you need a repository that is reachable by all participants - a remote repository. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote repository does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some HTTP server, a network file share or even on your local machine.
+To work with other people on the same project, you need a repository that is reachable by all participants - a remote repository. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote repository does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some HTTP server, a network file share or even on your local machine.
 
 To publish your work on a remote repository, it must be registered in your personal repository. It is possible to have multiple remote repositories registered. Each remote repository has an alias name e.g. "origin". If you clone a personal repository from a remote one, the remote is registered automatically as "origin". The name "origin" is just the default one of the remote repository where you cloned from. Besides of this, the name "origin" has no special meaning and you are free to rename it to your preferences (though most people do not mind to change the default).
 
@@ -1869,7 +1869,7 @@ A model that seems appropriate for very big teams (it used by the Linux kernel d
 
 # Technical background
 
-A personal Git repository is nothing more then a directory that contains a subdirectory named ".git" and content of the working copy. This subdirectory contains all the data of the repository. If you delete this ".git" subdirectory, your whole repository is gone with that.
+A personal Git repository is nothing more then a directory that contains a subdirectory named ".git" and content of the working copy. The subdirectory ".git" contains all the data of the repository. If you delete this ".git" subdirectory, your whole repository is gone with that.
 
 ## Plumbing and porcelain
 
