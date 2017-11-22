@@ -1651,6 +1651,118 @@ After successfully merging and committing, your commit history should look like 
 
 ![Merge that leads to conflicts in Git Extensions 11](images/gitext-merge-conflict16.png)
 
+# Git stash
+
+Most Git operations shall be done with a clean working copy, e.g. switching branches. If you are in the middle of some work and want something to do without committing your state of work, you can use `git stash`. A "stash" is basically like a commit that will not appear in the history and cannot be pushed to a remote repository. If you can restore your "stashed" changes every time, while being on every branch or commit without the need to have a clean working copy. Git tries to merge the stashed changes to the current working copy and gives a merge conflict if the stashed changes cannot be merged automatically.
+
+A stash is created with the simple command `git stash`. To restore the stash, type `git stash pop`.
+
+You can make multiple stashes. You can inspect them with `git stash list`. They are stored in a stack like structure and can be accessed as you want via `stash@{n}`. `n` is a number beginning at `0` for the most recent stash.  In default, Git takes the most recent stash.
+
+Very important: Git does *not* stash untracked (and ignored) files in default. If you want to stash untracked files, you have to type `git stash -u`. To even stash ignored files, you can type `git stash --all`.
+
+`git stash pop` is actually a shortcut, that behaves like `git stash apply` followed by `git stash drop`. `git stash apply` restores the most recent stash without deleting it from the stack. This can be useful e.g. if you want to apply some changes to multiple branches. `git stash apply` has another advantage that it offers an `--index` flag that tries to restore you staging area (index) when the stash was created. Without the `--index` flag, all applied changes are treated as they were not added to the staging area.
+
+`git stash drop` deletes the most recent stash. To delete all stashes that are ever created, type `git stash clear`.
+
+## Example
+
+Add a new file and commit it:
+
+```
+$ git add stash-example.txt
+$ git commit -m "Add example file for stashing"
+[master a2f1a7c] Add example file for stashing
+ 1 file changed, 1 insertion(+)
+ create mode 100644 stash-example.txt
+$ git show
+commit a2f1a7cb85aaeb9f6d812230d27eb38d2ac17ac6
+Author: Christian Dreier <christian.dreier@csa-germany.de>
+Date:   Wed Nov 22 18:45:44 2017 +0100
+
+    Add example file for stashing
+
+diff --git a/stash-example.txt b/stash-example.txt
+new file mode 100644
+index 0000000..c5c58b3
+--- /dev/null
++++ b/stash-example.txt
+@@ -0,0 +1 @@
++This is an example
+```
+
+Now modify the file:
+
+```
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   stash-example.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+$ git diff
+diff --git a/stash-example.txt b/stash-example.txt
+index c5c58b3..b355674 100644
+--- a/stash-example.txt
++++ b/stash-example.txt
+@@ -1 +1,2 @@
+ This is an example
++Hello!
+```
+
+Stashing this change is as simple as typing `git stash`:
+
+```
+$ git stash
+Saved working directory and index state WIP on master: a2f1a7c Add example file for stashing
+HEAD is now at a2f1a7c Add example file for stashing
+$ git status
+On branch master
+nothing to commit, working directory clean
+```
+
+Now you can make everything what you can do as if you did not make any changes since the commit. Assume that you made some huge work on some other branches and want to continue on the branch were you stashed the changes. The stashed state is restored with the command `git stash pop`:
+
+```
+$ git stash pop
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   stash-example.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (105c57bab11141a585f05a089d23627c69187f2a)
+```
+
+### With Git Extensions
+
+Add a new file and commit it:
+
+![Stash in Git Extensions, step 1](images/gitext-stash1.png)
+
+Now modify the file - Git Extensions should show you that there is something to commit. To stash, Git Extensions offers a menu button where it can be done directly:
+
+![Stash in Git Extensions, step 2](images/gitext-stash2.png)
+
+Alternatively, you can call the stash dialog by clicking directly on the button or the entry in the main menu:
+
+![Stash in Git Extensions, step 3](images/gitext-stash3.png)
+
+If you call the dialog, you should see this:
+
+![Stash in Git Extensions, step 4](images/gitext-stash4.png)
+
+After clicking on "Save changes" in this dialog (or using the button to perform a direct stash), your will be clean and Git Extensions will actually show you the "stash commits":
+
+![Stash in Git Extensions, step 5](images/gitext-stash5.png)
+
+Clicking on the "Stash pop" command in the main window or the "Apply changes" button in the stash dialog will behave like the corresponding CLI commands.
+
 # Working with remote repositories
 
 To work with other people on the same project, you need a repository that is reachable by all participants - a remote repository. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote repository does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some HTTP server, a network file share or even on your local machine.
@@ -2007,6 +2119,8 @@ A tool that promises to make it easy to clean the commit history of files that s
 [Book "Pro Git"](https://git-scm.com/book/en/v2)
 
 [Git User Manual](https://www.kernel.org/pub/software/scm/git/docs/user-manual.html)
+
+[Git documentation by Atlassian](https://www.atlassian.com/git)
 
 ## Remote repositories
 
