@@ -1985,7 +1985,7 @@ A personal Git repository is nothing more then a directory that contains a subdi
 
 ## Plumbing and porcelain
 
-While Git was created, the data model was created first and after that the tooling to manipulate this data model was created. In fact, the very first commits of Git itself were handcrafted by its creator. Because of this history and preferences of the creator, Git has many very low level commands to manipulate the data model. E.g. `git update-index` can be understood as a low level version of `git add`. They can be used to mess up a repository, repair a messed up repository or just to look at internals of a repository.
+While Git was created, the data model was created first and after that the tooling to manipulate this data model. In fact, the very first commits of Git itself were handcrafted by its creator. Because of this history and preferences of the creator, Git has many very low level commands to manipulate the data model. E.g. `git update-index` can be understood as a low level version of `git add`. They can be used to mess up a repository, repair a messed up repository or just to look at internals of a repository.
 
 The low level commands are called "plumbing commands" while the high level commands that are used most time (and in the examples of this document) are called "porcelain". It can be said that the plumbing commands came first to implement the tool and that the porcelain came later to make the tool user friendly.
 
@@ -2090,7 +2090,7 @@ As mentioned in the message of Git, you can create a branch at any time - just t
 
 A branch pointer points always to a commit. This commit is considered the last commit of this branch. If you make a commit while the HEAD pointer points to branch, this branch pointer will update to this new commit.
 
-The repository can contain as many branch pointers as desired. Deleting a branch pointer is no problem at all as long as the commit, where the deleted branch pointer pointed to, is reachable by any other branch pointer. If the commit is not reachable by any other branch pointer, you have to force the deletion because this commit and its data could be lost potentially - the commit can be reached only by its SHA1 hash and cleaned away one time.
+The repository can contain as many branch pointers as desired. Deleting a branch pointer is no problem at all as long as the commit, where the deleted branch pointer pointed to, is reachable by any other branch pointer. If the commit is not reachable by any other branch pointer, you have to force the deletion because this commit and its data could be lost potentially - the commit can be reached only by its SHA1 hash and is cleaned away one time.
 
 #### Tags
 
