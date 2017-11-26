@@ -2133,3 +2133,9 @@ A tool that promises to make it easy to clean the commit history of files that s
 [Blog entry to "GitFlow"](http://nvie.com/posts/a-successful-git-branching-model/)
 
 [Blog entry giving an overview to different workflows](http://blog.endpoint.com/2014/05/git-workflows-that-work.html)
+
+# Copyright
+
+![CSA logo](images/csa.jpg)
+
+[CSA Computer & Antriebstechnik GmbH](http://www.csa-germany.de/)
