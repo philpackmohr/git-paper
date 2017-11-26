@@ -138,10 +138,9 @@ $ git commit -m "My first commit"
 The repository contains now exactly one commit. Typing `git status` will give you this output now:
 
 ```
-$ git commit -m "My first commit"
-[master (root-commit) 15cc061] My first commit
- 1 file changed, 1 insertion(+)
- create mode 100644 hello.txt
+$ git status
+On branch master
+nothing to commit, working tree clean
 ```
 
 ##### With Git Extensions
@@ -1883,7 +1882,7 @@ The way in this example to make a central repository out of an existing personal
 - `cd central.git` and
 - `git push origin master` (to be done with the personal repository as current directory)
 
-can be abbreviated by the single line `git clone --bare .\personal1 central-repo.git`. But the new remote repository has to be still registered in the personal one.
+can be abbreviated by the single line `git clone --bare personal1 central-repo.git`. But the new remote repository has to be still registered in the personal one.
 
 Now clone a second personal repository out of the remote one:
 
