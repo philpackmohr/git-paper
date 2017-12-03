@@ -1915,69 +1915,6 @@ Date:   Mon Nov 6 11:19:52 2017 +0100
     Initialize
 ```
 
-# Workflows
-
-## Branching
-
-In traditional centralized VCSs it is usual to have a single line of history where all participants commit their changes on. Quite often, these commits introduce bugs and build errors. Occasionally a branch is created to stabilize the software for a release. This happens quiet seldom - 1 to 2 times a year - because creating a branch is very heavyweight traditionally (though modern iterations of certain centralized VCSs are optimized, e.g. Subversion) and can make additional problems depending on the project.
-
-In contrast, branching in Git is very lightweight and merging is usually not much a problem too. Because of this, there evolved many workflows that take advantage of branching. It can be supposed that each team has not only its own individual workflow, they could even be different between projects of the same team. The complexity of most workflows lingers between 2 extremes:
-
-- "Master only workflow"
-- [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) (though more complexity is always possible)
-
-Most workflows consist of one or more eternal living branches differentiated by their stability. Additionally there are temporary feature and bugfix branches. It seems most appropriate to decide for each project individually which workflow will be used. Refer to [an overview of different workflows](http://blog.endpoint.com/2014/05/git-workflows-that-work.html) for more information.
-
-
-### "Master only workflow"
-
-That is the most simple workflow and can be appropriate for individuals or very small teams if either:
-
-- Breaking changes can be accepted
-- There is another mechanism to ensure that the customers do not get faulty versions, e.g. a QA team tests the changes that are pushed by the developers and ensure that the customers get only tested and fixed versions.
-
-### [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/)
-
-This workflow consists of:
-
-- An eternal "master" or "production" branch that contains the software versions that the customers get.
-- An eternal "develop" branch that contains the current state of development.
-- Temporary feature branches (one for each feature) - they get merged and then deleted after the feature is completed. Usually the merges are always recursive merges to preserve that certain changes belonged to a certain branch in the past.
-- A temporary release branch. A release branch is branched off of the development branch right before a release and exists to make sure that the feature set to deliver is stable actually. Bugfixes done there are merged back to "develop". After the state of the release branch can be considered stable, it gets merged with "master" and then deleted.
-- If necessary, a temporary "hotfix" branch to fix bugs in releases. After the hotfix is implemented, the corresponding branch gets merged with "master" and "develop" and then deleted.
-
-Refer [the blog post on GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) for more information and a diagram (that is drawn in the wrong direction). It seems to be appropriate to base your workflow on GitFlow if you release your software packaged every few months.
-
-### Other workflows
-
-While the "Master only workflow" can be considered too simple, [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) is perceived as too complex by many people, e.g. [the GitHub team](http://scottchacon.com/2011/08/31/github-flow.html). Generally a workflow should not be too complicated but should also support you to ensure the required quality of the software.
-
-## Remote repositories in teams
-
-Usually a project has a repository that is considered central - the "blessed repository". There are three common basic models to manage the blessed repository:
-
-- Have 1 public repository that is used by everyone.
-- An integration manager pulls the changes of each developer and merges them to a blessed repository, managed by him only.
-- Multiple people pull the changes of the developers and pass the changes to a "benevolent dictator".
-
-### Centralized
-
-![Centralized repository](images/centralized.svg)
-
-There is only one public repository where everyone pushes to. This model may not be appropriate if there are too many developers working on the project.
-
-### Integration Manager
-
-![Integration manager model](images/integration-manager.svg)
-
-Every developer has additionally to his private repository a public one. The blessed repository is managed by a dedicated "integration manager". The developers publish their changes to their own public repositories and send "pull requests" to the integration manager who merges these changes to the blessed repository. The integration manager can enforce all kinds of policies this way. But if the project gets too big, the integration manager can be overburdened with all the pull requests that he gets constantly.
-
-### Benevolent Dictator
-
-![Benevolent Dictator model](images/benevolent-dictator.svg)
-
-A model that seems appropriate for very big teams (it used by the Linux kernel developers - Linus Torvalds is the benevolent dictator). Like in the integration manager model, every developer has his own public repository additionally to his private one and the blessed public one. Pull requests are not sent to the "dictator" but to his "lieutenants". They filter the pull requests that do not fit to the requirements and rules and are able to pass pull requests from multiple developers as one pull request. It is possible that the lieutenants have sub-lieutenants and they could have sub-sub-lieutenants and so on.
-
 # Technical background
 
 A personal Git repository is nothing more then a directory that contains a subdirectory named ".git" and content of the working copy. The subdirectory ".git" contains all the data of the repository. If you delete this ".git" subdirectory, your whole repository is gone with that.
@@ -2094,6 +2031,69 @@ The repository can contain as many branch pointers as desired. Deleting a branch
 #### Tags
 
 Not a pointer really as mentioned above but with some properties of a pointer. It points always to an object that is considered trustworthy by the tagger. If you checkout a tag (update the HEAD pointer to point to a tag), the HEAD pointer will be in a detached state like after a checkout of a commit directly. Because if you make a commit while a tag is checked out, the commit will not belong to any branch and the HEAD pointer will be updated to point to the new commit directly.
+
+# Workflows
+
+## Branching
+
+In traditional centralized VCSs it is usual to have a single line of history where all participants commit their changes on. Quite often, these commits introduce bugs and build errors. Occasionally a branch is created to stabilize the software for a release. This happens quiet seldom - 1 to 2 times a year - because creating a branch is very heavyweight traditionally (though modern iterations of certain centralized VCSs are optimized, e.g. Subversion) and can make additional problems depending on the project.
+
+In contrast, branching in Git is very lightweight and merging is usually not much a problem too. Because of this, there evolved many workflows that take advantage of branching. It can be supposed that each team has not only its own individual workflow, they could even be different between projects of the same team. The complexity of most workflows lingers between 2 extremes:
+
+- "Master only workflow"
+- [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) (though more complexity is always possible)
+
+Most workflows consist of one or more eternal living branches differentiated by their stability. Additionally there are temporary feature and bugfix branches. It seems most appropriate to decide for each project individually which workflow will be used. Refer to [an overview of different workflows](http://blog.endpoint.com/2014/05/git-workflows-that-work.html) for more information.
+
+
+### "Master only workflow"
+
+That is the most simple workflow and can be appropriate for individuals or very small teams if either:
+
+- Breaking changes can be accepted
+- There is another mechanism to ensure that the customers do not get faulty versions, e.g. a QA team tests the changes that are pushed by the developers and ensure that the customers get only tested and fixed versions.
+
+### [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/)
+
+This workflow consists of:
+
+- An eternal "master" or "production" branch that contains the software versions that the customers get.
+- An eternal "develop" branch that contains the current state of development.
+- Temporary feature branches (one for each feature) - they get merged and then deleted after the feature is completed. Usually the merges are always recursive merges to preserve that certain changes belonged to a certain branch in the past.
+- A temporary release branch. A release branch is branched off of the development branch right before a release and exists to make sure that the feature set to deliver is stable actually. Bugfixes done there are merged back to "develop". After the state of the release branch can be considered stable, it gets merged with "master" and then deleted.
+- If necessary, a temporary "hotfix" branch to fix bugs in releases. After the hotfix is implemented, the corresponding branch gets merged with "master" and "develop" and then deleted.
+
+Refer [the blog post on GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) for more information and a diagram (that is drawn in the wrong direction). It seems to be appropriate to base your workflow on GitFlow if you release your software packaged every few months.
+
+### Other workflows
+
+While the "Master only workflow" can be considered too simple, [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) is perceived as too complex by many people, e.g. [the GitHub team](http://scottchacon.com/2011/08/31/github-flow.html). Generally a workflow should not be too complicated but should also support you to ensure the required quality of the software.
+
+## Remote repositories in teams
+
+Usually a project has a repository that is considered central - the "blessed repository". There are three common basic models to manage the blessed repository:
+
+- Have 1 public repository that is used by everyone.
+- An integration manager pulls the changes of each developer and merges them to a blessed repository, managed by him only.
+- Multiple people pull the changes of the developers and pass the changes to a "benevolent dictator".
+
+### Centralized
+
+![Centralized repository](images/centralized.svg)
+
+There is only one public repository where everyone pushes to. This model may not be appropriate if there are too many developers working on the project.
+
+### Integration Manager
+
+![Integration manager model](images/integration-manager.svg)
+
+Every developer has additionally to his private repository a public one. The blessed repository is managed by a dedicated "integration manager". The developers publish their changes to their own public repositories and send "pull requests" to the integration manager who merges these changes to the blessed repository. The integration manager can enforce all kinds of policies this way. But if the project gets too big, the integration manager can be overburdened with all the pull requests that he gets constantly.
+
+### Benevolent Dictator
+
+![Benevolent Dictator model](images/benevolent-dictator.svg)
+
+A model that seems appropriate for very big teams (it used by the Linux kernel developers - Linus Torvalds is the benevolent dictator). Like in the integration manager model, every developer has his own public repository additionally to his private one and the blessed public one. Pull requests are not sent to the "dictator" but to his "lieutenants". They filter the pull requests that do not fit to the requirements and rules and are able to pass pull requests from multiple developers as one pull request. It is possible that the lieutenants have sub-lieutenants and they could have sub-sub-lieutenants and so on.
 
 # Additional tools
 
