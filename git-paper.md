@@ -1762,6 +1762,52 @@ After clicking on "Save changes" in this dialog (or using the button to perform 
 
 Clicking on the "Stash pop" command in the main window or the "Apply changes" button in the stash dialog will behave like the corresponding CLI commands.
 
+# Git reset
+
+A very important command is `git reset`. To understand this command it is needed to consider 3 parts:
+
+- HEAD pointer and the commit history it points to
+- Index, from which the staging area derives
+- Working copy
+
+`git reset` can be invoked in the following modes:
+
+- `--soft`
+- `--mixed`
+- `--hard`
+
+It can be said that `git reset` follows a 3 step algorithm and the modes mentioned above say where to interrupt further processing of this algorithm.
+
+## Steps of `git reset`
+
+### Step 1: `git reset --soft {commit or pointer to it}`
+
+Move the HEAD pointer, together with the branch it points to, to the given object. It can be either a commit or another branch.
+
+### Step 2: `git reset --mixed {commit or pointer to it}` (default)
+
+Reset the index to the state of the designated commit - the staging area is emptied.
+
+### Step 3: `git reset --hard {commit or pointer to it}`
+
+Set the working copy to the state of the designated commit. This step (or mode) destroys your data actually and should be used with care.
+
+## `git reset` on files
+
+It is possible to use `git reset` on files and directories too. But in this case, you cannot give a mode parameter, leading Git to default to `--mixed` mode.
+
+This can be used to remove files from the staging area or "unstage the file".
+
+It is even possible to give a commit ID or branch name to `git reset`.
+
+```
+$ git reset {commit or pointer to it} -- {path}
+```
+
+Note the double dash "`--`". If you add this double dash with leading and trailing whitespace to the command line, Git assumes that the thing after that is a file. Sometimes it is not easy for Git to distinguish object names and file names.
+
+The parts of the index that point to the given path are set to the state of the given commit. The staging area contains now diff of the given path with the state of the commit. You could now say `git checkout {path}` to set your working copy of the file(s) to that state.
+
 # Working with remote repositories
 
 To work with other people on the same project, you need a repository that is reachable by all participants - a remote repository. In contrast to central VCSs, you do not need any special server instance or something (though Git repositories can be managed with help of specialized server software too). Like a personal Git repository, a remote repository is nothing more then a directory containing the repository data. In contrast to a personal repository, a remote repository does not contain a working copy but the repository data only. It can be on any place that seems appropriate: some HTTP server, a network file share or even on your local machine.
@@ -1793,6 +1839,31 @@ Fetches the content of the remote repository with name `{remote name}` to the pe
 Fetches the content of the remote repository with name `{remote name}` to the personal one and merges the local current branch to the corresponding remote one. Basically it behaves like `git fetch {remote name}` followed by `git merge {remote branch name}`.
 
 If you want that your local branch is not merged with the last state of the remote branch but based on it in the history, you can say `git pull --rebase {remote name}`. This rebases your local branch to the last commit of the remote branch.
+
+## If your team thinks, rebasing a public repository is a good idea
+
+Some teams do not want have parallel lines for feature branches but put them consecutively - sometimes even without an integration manager (see below). To synchronize your local repository with the public rebased one, following steps can be used (source: [Reset and sync local repository with remote branch](http://www.ocpsoft.org/tutorials/git/reset-and-sync-local-respository-with-remote-branch/)):
+
+```
+git checkout master
+git fetch origin
+```
+
+Checkout the master branch and perform only a fetch of the remote.
+
+```
+git reset --hard origin/master
+```
+
+Set your local master branch pointer wherever the remote master branch pointer is currently. Before you do this step you should make sure that your feature branch is still reachable from the remote master branch pointer. If not, you should rebase your local branch on the new master branch.
+
+```
+git clean -f -d
+```
+
+Delete untracked and ignored files out of a repository to make sure all is clean.
+
+After that, you can checkout your feature branch.
 
 ## Example
 
@@ -2132,6 +2203,10 @@ A tool that promises to make it easy to clean the commit history of files that s
 [Blog entry to "GitFlow"](http://nvie.com/posts/a-successful-git-branching-model/)
 
 [Blog entry giving an overview to different workflows](http://blog.endpoint.com/2014/05/git-workflows-that-work.html)
+
+## Practice
+
+[Reset and sync local repository with remote branch](http://www.ocpsoft.org/tutorials/git/reset-and-sync-local-respository-with-remote-branch/)
 
 # Copyright
 
