@@ -49,12 +49,13 @@ Commit often, perfect later, publish once
 - [Git stash](#git-stash)
   - [Example](#example)
     - [With Git Extensions](#with-git-extensions)
-- [Git reset](#git-reset)
+- [Git Reset](#git-reset)
   - [Steps of `git reset`](#steps-of-git-reset)
     - [Step 1: `git reset --soft {commit or pointer to it}`](#step-1:-git-reset---soft-commit-or-pointer-to-it)
     - [Step 2: `git reset --mixed {commit or pointer to it}` ](#step-2:-git-reset---mixed-commit-or-pointer-to-it)
     - [Step 3: `git reset --hard {commit or pointer to it}`](#step-3:-git-reset---hard-commit-or-pointer-to-it)
   - [`git reset` on files](#git-reset-on-files)
+    - [Discarding any changes in a file](#discarding-any-changes-in-a-file)
 - [Working with remote repositories](#working-with-remote-repositories)
   - [Basic commands](#basic-commands)
     - [`git init --bare`](#git-init---bare)
@@ -1857,21 +1858,21 @@ After clicking on "Save changes" in this dialog (or using the button to perform 
 
 Clicking on the "Stash pop" command in the main window or the "Apply changes" button in the stash dialog will behave like the corresponding CLI commands.
 
-# Git reset
+# Git Reset
 
-A very important command is `git reset`. To understand this command it is needed to consider 3 parts:
+A very important command is `git reset`. To understand this command, it is needed to consider 3 parts:
 
 - HEAD pointer and the commit history it points to
-- Index, from which the staging area derives
+- Index from which the staging area derives
 - Working copy
 
-`git reset` can be invoked in the following modes:
+In general "to reset something" means setting it to a predefined state. `git reset` does the same with the repository data. Git knows 3 modes to reset the repository:
 
-- `--soft`
-- `--mixed`
-- `--hard`
+1) soft
+2) mixed
+3) hard
 
-It can be said that `git reset` follows a 3 step algorithm and the modes mentioned above say where to interrupt further processing of this algorithm.
+These 3 modes reflect the reset algorithm of Git that consists of 3 steps. The "hard" mode invokes all 3 steps while the "soft" mode invokes only the first step. The "hard" mode is the only one that touches the files in the working copy actually.
 
 ## Steps of `git reset`
 
@@ -1879,21 +1880,33 @@ It can be said that `git reset` follows a 3 step algorithm and the modes mention
 
 Move the HEAD pointer, together with the branch it points to, to the given object. It can be either a commit or another branch.
 
+Nothing else will happen. If you put some changes in the staging area, they will stay there after the "soft" reset. The state of your unchanged working copy will be diffed to the commit that you gave `git reset`.
+
 ### Step 2: `git reset --mixed {commit or pointer to it}` (default)
 
 Reset the index to the state of the designated commit - the staging area is emptied.
+
+Identically to the "soft" mode, the working copy will not be touched and it will be diffed to the other commit.
+
+"Default" means that this mode will be always invoked, if you give no mode parameter.
 
 ### Step 3: `git reset --hard {commit or pointer to it}`
 
 Set the working copy to the state of the designated commit. This step (or mode) destroys your data actually and should be used with care.
 
+To explain it more extensively, following happens at a "hard" reset:
+
+1) The HEAD pointer, together with the branch pointer it points to, will move to the given commit or if you give a (branch) pointer, to the commit that is pointed by the given (branch) pointer (soft).
+2) Empty the staging area (mixed)
+3) Set the working copy to the state of the given commit. If there were uncommitted changes, they are gone now.
+
 ## `git reset` on files
 
-It is possible to use `git reset` on files and directories too. But in this case, you cannot give a mode parameter, leading Git to default to `--mixed` mode.
+It is possible to use `git reset` on files and directories too. But in this case, you cannot give a mode parameter, leading Git to default to the `--mixed` mode.
 
 This can be used to remove files from the staging area or "unstage the file".
 
-It is even possible to give a commit ID or branch name to `git reset`.
+It is even possible to give a commit ID or branch name to `git reset`. Since the working copy will not be touched, the file state of the given commit will go to the staging area. You can either commit this state immediately or - more common - "checkout" this state (see below ["Discarding any changes in a file"](#discarding-any-changes-in-a-file)).
 
 ```
 $ git reset {commit or pointer to it} -- {path}
@@ -1901,7 +1914,26 @@ $ git reset {commit or pointer to it} -- {path}
 
 Note the double dash "`--`". If you add this double dash with leading and trailing whitespace to the command line, Git assumes that the thing after that is a file. Sometimes it is not easy for Git to distinguish object names and file names.
 
-The parts of the index that point to the given path are set to the state of the given commit. The staging area contains now diff of the given path with the state of the commit. You could now say `git checkout {path}` to set your working copy of the file(s) to that state.
+The parts of the index that point to the given path are set to the state of the given commit - the file is not in the staging area anymore.
+
+### Discarding any changes in a file
+
+If you want to discard the changes since the current commit, `git reset` is not the right command - `git checkout` will do the job instead:
+
+```
+git checkout {path}
+```
+
+Note that `git checkout` does not touch the staging area. If you want to discard changes that are already staged, you have to `git reset` the file first and after that `git checkout` it.
+
+Actually, `git checkout` will set the given file to the state that is currently in the index. If you put some changes to the staging area before invoking `git checkout`, the file will have the state that you see in the staging area.
+
+In combination with `git reset`, `git checkout` can be used to work on a file as it was in some commit, some time ago:
+
+1) `git reset {commit or pointer to it} -- {path}`  
+Get the old file state in the staging area
+2) `git checkout {path}`  
+Put the actual file in the working copy to that state
 
 # Working with remote repositories
 
